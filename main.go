@@ -23,7 +23,6 @@ type record struct {
 }
 
 type configuration struct {
-	URL string
 	Credentials string
 }
 
