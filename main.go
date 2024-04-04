@@ -17,9 +17,19 @@ import (
 
 type record struct {
 	Records []struct {
-		Name string `json:"name"`
 		UUID string `json:"uuid"`
+		Destination destination `json:"destination"`
 	} `json:"records"`
+}
+
+type relationship struct {
+	UUID string `json:"uuid"`
+	Destination destination `json:"destination"`
+}
+
+type destination struct {
+	Path string `json:"path"`
+	UUID string `json:"uuid"`
 }
 
 type configuration struct {
@@ -33,7 +43,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	out, err := listBuckets(bucket)
+	out, err := listFolder(bucket)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -42,13 +52,21 @@ func main() {
 		fmt.Println(i+1, v)
 	}
 
-	data := unmarshalURL(cluster)
-	for _, v := range data.Records {
-		fmt.Printf("%+v\n", v)
+	creds := getCreds("config.json")
+	url := "https://"+cluster+"/api/snapmirror/relationships/"
+
+	rec := getRecords(creds, url)
+	for _, v := range rec.Records {
+		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
+			rel := getRelationship(creds, url, v.UUID)
+			if rel.UUID == v.UUID {
+				fmt.Println(rel.Destination.UUID)
+			}
+		}
 	}
 }
 
-func clientGET(url, credentials string) *http.Response {
+func clientGET(creds, url string) *http.Response {
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -62,7 +80,7 @@ func clientGET(url, credentials string) *http.Response {
 	if err != nil {
 		log.Fatal(err)
 	}
-	request.Header.Set("Authorization", "Basic "+ credentials)
+	request.Header.Set("Authorization", "Basic "+ creds)
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
@@ -84,17 +102,7 @@ func clientGET(url, credentials string) *http.Response {
 // }
 
 
-func unmarshalURL(cluster string) record {
-	creds := getCreds("config.json")
-	url := "https://"+cluster+"/api/storage/volumes"
-	resp := clientGET(url, creds); defer resp.Body.Close()
 
-	var data record
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		log.Fatal(err)
-	}
-	return data
-}
 
 func getCreds(filename string) string {
 	d, err := os.ReadFile(filename)
@@ -124,7 +132,7 @@ func getFlags() (string, string, error) {
 	return *cluster, *bucket, nil
 }
 
-func listBuckets(bucket string) ([]string, error) {
+func listFolder(bucket string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 10)
 	defer cancel()
 
@@ -143,3 +151,27 @@ func listBuckets(bucket string) ([]string, error) {
 	}
 	return list, nil
 }
+
+func getRecords(creds, url string) record {
+	resp := clientGET(creds, url); defer resp.Body.Close()
+
+	var r record
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		log.Fatal(err)
+	}
+	return r
+}
+
+func getRelationship(creds, url, uuid string) relationship {
+	url = url + uuid
+	resp := clientGET(creds, url); defer resp.Body.Close()
+
+	var r relationship
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+		log.Fatal(err)
+	}
+
+	return r
+}
+
+
