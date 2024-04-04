@@ -37,10 +37,6 @@ type Source struct {
 	Path string `json:"path"`
 }
 
-type configuration struct {
-	Credentials string
-}
-
 func main() {
 
 	cluster, bucket, err := getFlags()
@@ -57,7 +53,7 @@ func main() {
 		fmt.Println(i+1, v)
 	}
 
-	creds := getCreds("config.json")
+	creds := os.Getenv("CREDS")
 	url := "https://" + cluster + "/api/snapmirror/relationships/"
 
 	rec := getRecords(creds, url)
@@ -92,20 +88,6 @@ func clientGET(creds, url string) *http.Response {
 		log.Fatal(err)
 	}
 	return resp
-}
-
-func getCreds(filename string) string {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var c configuration
-	if err = json.Unmarshal(data, &c); err != nil {
-		log.Fatal(err)
-	}
-
-	return c.Credentials
 }
 
 func getFlags() (string, string, error) {
