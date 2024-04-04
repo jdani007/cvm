@@ -42,7 +42,6 @@ func main() {
 		fmt.Println(i+1, v)
 	}
 
-	// data := unmarshFile("records.json")
 	data := unmarshalURL(cluster)
 	for _, v := range data.Records {
 		fmt.Printf("%+v\n", v)
@@ -71,18 +70,18 @@ func clientGET(url, credentials string) *http.Response {
 	return resp
 }
 
-func unmarshFile(file string) record {
-	body, err := os.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var data record
-	if err = json.Unmarshal(body, &data); err != nil {
-		log.Fatal(err)
-	}
+// func unmarshFile(file string) record {
+// 	body, err := os.ReadFile(file)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	var data record
+// 	if err = json.Unmarshal(body, &data); err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	return data
-}
+// 	return data
+// }
 
 
 func unmarshalURL(cluster string) record {
@@ -113,14 +112,14 @@ func getCreds(filename string) string {
 
 func getFlags() (string, string, error) {
 	cluster := flag.String("c", "", "enter cluster hostname or ip")
-	bucket := flag.String("b", "", "enter the project the cluster is running in")
+	bucket := flag.String("b", "", "enter the bucket the cluster is running in")
 	flag.Parse()
 
 	if *cluster == "" {
 		return "", "", fmt.Errorf("enter a cluster name")
 	}
 	if *bucket == "" {
-		return "", "", fmt.Errorf("enter a project name")
+		return "", "", fmt.Errorf("enter a bucket name")
 	}
 	return *cluster, *bucket, nil
 }
