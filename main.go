@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-type record struct {
+type relationships struct {
 	Records []struct {
 		UUID        string      `json:"uuid"`
 		Destination destination `json:"destination"`
@@ -23,18 +23,16 @@ type record struct {
 }
 
 type relationship struct {
-	UUID        string      `json:"uuid"`
-	Source      Source      `json:"source"`
+	UUID   string `json:"uuid"`
+	Source struct {
+		Path string `json:"path"`
+	} `json:"source"`
 	Destination destination `json:"destination"`
 }
 
 type destination struct {
 	Path string `json:"path"`
 	UUID string `json:"uuid"`
-}
-
-type Source struct {
-	Path string `json:"path"`
 }
 
 func main() {
@@ -44,7 +42,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	out, err := listFolder(bucket)
+	out, err := getFolders(bucket)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -53,19 +51,10 @@ func main() {
 		fmt.Println(i+1, v)
 	}
 
-	creds := os.Getenv("CREDS")
-	url := "https://" + cluster + "/api/snapmirror/relationships/"
-
-	rec := getRecords(creds, url)
-	for _, v := range rec.Records {
-		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
-			rel := getRelationship(creds, url, v.UUID)
-			if rel.UUID == v.UUID {
-				volume := strings.Split(rel.Source.Path, ":")
-				fmt.Println(rel.Destination.UUID, volume[1])
-			}
-		}
+	for n, v := range run(cluster) {
+		fmt.Println(n, v)
 	}
+
 }
 
 func clientGET(creds, url string) *http.Response {
@@ -104,7 +93,7 @@ func getFlags() (string, string, error) {
 	return *cluster, *bucket, nil
 }
 
-func listFolder(bucket string) ([]string, error) {
+func getFolders(bucket string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
@@ -117,18 +106,18 @@ func listFolder(bucket string) ([]string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(output)))
 	scanner.Split(bufio.ScanLines)
 
-	var list []string
+	var ss []string
 	for scanner.Scan() {
-		list = append(list, scanner.Text())
+		ss = append(ss, scanner.Text())
 	}
-	return list, nil
+	return ss, nil
 }
 
-func getRecords(creds, url string) record {
+func getRelationships(creds, url string) relationships {
 	resp := clientGET(creds, url)
 	defer resp.Body.Close()
 
-	var r record
+	var r relationships
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		log.Fatal(err)
 	}
@@ -144,6 +133,24 @@ func getRelationship(creds, url, uuid string) relationship {
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		log.Fatal(err)
 	}
-
 	return r
+}
+
+func run(cluster string) map[string]string {
+	creds := os.Getenv("CREDS")
+	url := "https://" + cluster + "/api/snapmirror/relationships/"
+
+	volData := make(map[string]string)
+
+	rec := getRelationships(creds, url)
+	for _, v := range rec.Records {
+		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
+			rel := getRelationship(creds, url, v.UUID)
+			if rel.UUID == v.UUID {
+				volume := strings.Split(rel.Source.Path, ":")
+				volData[volume[1]] = rel.Destination.UUID
+			}
+		}
+	}
+	return volData
 }
