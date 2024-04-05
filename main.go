@@ -104,7 +104,7 @@ func getSize(container, uuid string) (string, error) {
 	result := strings.Split(string(output), " ")
 	size, err := strconv.ParseFloat(result[0], 64)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	return prettyByteSize(size), nil
 }
@@ -142,7 +142,7 @@ func getRelationship(creds, url, uuid string) relationship {
 
 	var r relationship
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 	return r
 }
