@@ -41,17 +41,17 @@ func main() {
 	flag.Parse()
 	
 	if *cluster == "" {
-		fmt.Println("enter a cluster name")
+		fmt.Println("enter cluster hostname or ip")
 		os.Exit(1)
 	}
 
 	creds := os.Getenv("CREDS")
 	url := "https://" + *cluster + "/api/snapmirror/relationships/"
 
-	container, rec := getRelationships(creds, url)
+	container, rel := getRelationships(creds, url)
 
 	volData := make(map[string]string)
-	for _, v := range rec.Records {
+	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
 			rel := getRelationship(creds, url, v.UUID)
 			if rel.UUID == v.UUID {
@@ -72,7 +72,6 @@ func main() {
 	for i, v := range folders {
 		fmt.Println(i+1, v)
 	}
-
 }
 
 func clientGET(creds, url string) *http.Response {
@@ -89,7 +88,7 @@ func clientGET(creds, url string) *http.Response {
 	if err != nil {
 		log.Fatal(err)
 	}
-	request.Header.Set("Authorization", "Basic "+creds)
+	request.Header.Set("Authorization", "Basic " + creds)
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
