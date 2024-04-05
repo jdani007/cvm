@@ -66,7 +66,10 @@ func main() {
 	var volData []volume
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
-			r := getRelationship(creds, url, v.UUID)
+			r, err := getRelationship(creds, url, v.UUID)
+			if err != nil {
+				log.Fatal(err)
+			}
 			if r.UUID == v.UUID {
 				vol := strings.Split(r.Source.Path, ":")
 				size, err := getSize(container, r.Destination.UUID)
@@ -138,16 +141,16 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 	return container, url, rel, nil
 }
 
-func getRelationship(creds, url, uuid string) relationship {
+func getRelationship(creds, url, uuid string) (relationship, error) {
 
 	resp := clientGET(creds, url + uuid)
 	defer resp.Body.Close()
 
 	var r relationship
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		log.Fatal(err)
+		return r, err
 	}
-	return r
+	return r, nil
 }
 
 func clientGET(creds, url string) *http.Response {
