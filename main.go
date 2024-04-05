@@ -1,20 +1,27 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
+
+type volume struct {
+	Name string
+	UUID string
+	Size string
+}
 
 type relationships struct {
 	Records []struct {
@@ -41,55 +48,65 @@ func main() {
 	flag.Parse()
 	
 	if *cluster == "" {
-		log.Fatal("enter cluster hostname or ip")
+		fmt.Println("enter cluster hostname or ip")
+		os.Exit(1)
 	}
+	
 	creds, ok := os.LookupEnv("CREDS")
 	if !ok {
-		log.Fatal("credentials missing from environment variable 'CREDS'")
+		fmt.Println("credentials missing from environment variable 'CREDS'")
+		os.Exit(1)
 	}
 
 	container, url, rel := getRelationships(creds, *cluster)
 
-	volData := make(map[string]string)
+	var volData []volume
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
 			r := getRelationship(creds, url, v.UUID)
 			if r.UUID == v.UUID {
-				volume := strings.Split(r.Source.Path, ":")
-				volData[volume[1]] = r.Destination.UUID
+				vol := strings.Split(r.Source.Path, ":")
+				size, err := getSize(container, r.Destination.UUID)
+				if err != nil {
+					log.Fatal(err)
+				}
+				volData = append(volData, volume{
+					Name: vol[1],
+					UUID: r.Destination.UUID,
+					Size: size,
+				})
 			}
 		}
 	}
-	for k, v := range volData {
-		fmt.Println(k, v)
-	}
 
-	folders, err := getFolders(container)
-	if err != nil {
-		log.Fatal(err)
+	fmt.Println()
+	for _, v := range volData {
+		fmt.Println(v.Size, v.UUID, v.Name)
 	}
-	for i, v := range folders {
-		fmt.Println(i + 1, v)
-	}
+	fmt.Println()
+
 }
 
 
-func getFolders(container string) ([]string, error) {
+func getSize(container, uuid string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "gsutil", "ls", "gs://test-" + container)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, err
-	}
+	url := "gs://test-"+container+"/"+uuid
 
-	scanner := bufio.NewScanner(strings.NewReader(string(output)))
-	var ss []string
-	for scanner.Scan() {
-		ss = append(ss, scanner.Text())
+	args := []string{"storage","du",url,"--summarize"}
+	
+	cmd := exec.CommandContext(ctx, "gcloud", args...)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
 	}
-	return ss, nil
+	result := strings.Split(string(output), " ")
+	size, err := strconv.ParseFloat(result[0], 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return prettyByteSize(size), nil
 }
 
 func getRelationships(creds, cluster string) (string, string, relationships) {
@@ -150,4 +167,16 @@ func clientGET(creds, url string) *http.Response {
 		log.Fatal(err)
 	}
 	return resp
+}
+
+// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
+// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
+func prettyByteSize(bf float64) string {
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(bf) < 1024.0 {
+			return fmt.Sprintf("%3.1f%sB", bf, unit)
+		}
+		bf /= 1024.0
+	}
+	return fmt.Sprintf("%.1fYiB", bf)
 }
