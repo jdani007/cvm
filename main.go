@@ -41,26 +41,22 @@ func main() {
 	flag.Parse()
 	
 	if *cluster == "" {
-		fmt.Println("enter cluster hostname or ip")
-		os.Exit(1)
+		log.Fatal("enter cluster hostname or ip")
 	}
 	creds, ok := os.LookupEnv("CREDS")
 	if !ok {
-		fmt.Println("credentials missing from environment variable 'CREDS'")
-		os.Exit(1)
+		log.Fatal("credentials missing from environment variable 'CREDS'")
 	}
 
-	url := "https://" + *cluster + "/api/snapmirror/relationships/"
-
-	container, rel := getRelationships(creds, url)
+	container, url, rel := getRelationships(creds, *cluster)
 
 	volData := make(map[string]string)
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
-			rel := getRelationship(creds, url, v.UUID)
-			if rel.UUID == v.UUID {
-				volume := strings.Split(rel.Source.Path, ":")
-				volData[volume[1]] = rel.Destination.UUID
+			r := getRelationship(creds, url, v.UUID)
+			if r.UUID == v.UUID {
+				volume := strings.Split(r.Source.Path, ":")
+				volData[volume[1]] = r.Destination.UUID
 			}
 		}
 	}
@@ -70,8 +66,7 @@ func main() {
 
 	folders, err := getFolders(container)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	for i, v := range folders {
 		fmt.Println(i + 1, v)
@@ -83,17 +78,13 @@ func getFolders(container string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	bucket := "gs://test-" + container
-
-	cmd := exec.CommandContext(ctx, "gsutil", "ls", bucket)
+	cmd := exec.CommandContext(ctx, "gsutil", "ls", "gs://test-" + container)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(string(output)))
-	scanner.Split(bufio.ScanLines)
-
 	var ss []string
 	for scanner.Scan() {
 		ss = append(ss, scanner.Text())
@@ -101,7 +92,10 @@ func getFolders(container string) ([]string, error) {
 	return ss, nil
 }
 
-func getRelationships(creds, url string) (string, relationships) {
+func getRelationships(creds, cluster string) (string, string, relationships) {
+
+	url := "https://" + cluster + "/api/snapmirror/relationships/"
+
 	resp := clientGET(creds, url)
 	defer resp.Body.Close()
 
@@ -121,17 +115,17 @@ func getRelationships(creds, url string) (string, relationships) {
 			})
 		}
 	}
-	return container, rel
+	return container, url, rel
 }
 
 func getRelationship(creds, url, uuid string) relationship {
-	url = url + uuid
-	resp := clientGET(creds, url)
+
+	resp := clientGET(creds, url + uuid)
 	defer resp.Body.Close()
 
 	var r relationship
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	return r
 }
