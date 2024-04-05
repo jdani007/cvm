@@ -124,14 +124,15 @@ func getRelationships(creds, url string) (string, relationships) {
 	resp := clientGET(creds, url)
 	defer resp.Body.Close()
 
-	var r relationships
-	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
+	var rel relationships
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
 		log.Fatal(err)
 	}
 
 	var once sync.Once
 	var container string
-	for _, v := range r.Records {
+	
+	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
 			once.Do(func(){
 				path := strings.Split(v.Destination.Path, ":")
@@ -139,7 +140,7 @@ func getRelationships(creds, url string) (string, relationships) {
 			})
 		}
 	}
-	return container, r
+	return container, rel
 }
 
 func getRelationship(creds, url, uuid string) relationship {
