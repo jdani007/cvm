@@ -58,7 +58,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	container, url, rel := getRelationships(creds, *cluster)
+	container, url, rel, err := getRelationships(creds, *cluster)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var volData []volume
 	for _, v := range rel.Records {
@@ -109,7 +112,7 @@ func getSize(container, uuid string) (string, error) {
 	return prettyByteSize(size), nil
 }
 
-func getRelationships(creds, cluster string) (string, string, relationships) {
+func getRelationships(creds, cluster string) (string, string, relationships, error) {
 
 	url := "https://" + cluster + "/api/snapmirror/relationships/"
 
@@ -118,7 +121,7 @@ func getRelationships(creds, cluster string) (string, string, relationships) {
 
 	var rel relationships
 	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
-		log.Fatal(err)
+		return "", "", rel, err
 	}
 
 	var once sync.Once
@@ -132,7 +135,7 @@ func getRelationships(creds, cluster string) (string, string, relationships) {
 			})
 		}
 	}
-	return container, url, rel
+	return container, url, rel, nil
 }
 
 func getRelationship(creds, url, uuid string) relationship {
