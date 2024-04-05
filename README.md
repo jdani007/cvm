@@ -1,6 +1,6 @@
 # mapstorage
 
-Determine Google cloud storage per volume usage for Netap Cloud Backup
+Determine Google cloud storage per volume usage for Netapp Cloud Backup
 
 still work in progress
 
