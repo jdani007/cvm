@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -36,23 +37,40 @@ type destination struct {
 }
 
 func main() {
+	cluster := flag.String("c", "", "enter cluster hostname or ip")
+	flag.Parse()
+	
+	if *cluster == "" {
+		fmt.Println("enter a cluster name")
+		os.Exit(1)
+	}
 
-	cluster, bucket, err := getFlags()
+	creds := os.Getenv("CREDS")
+	url := "https://" + *cluster + "/api/snapmirror/relationships/"
+
+	container, rec := getRelationships(creds, url)
+
+	volData := make(map[string]string)
+	for _, v := range rec.Records {
+		if strings.HasPrefix(v.Destination.Path, container) {
+			rel := getRelationship(creds, url, v.UUID)
+			if rel.UUID == v.UUID {
+				volume := strings.Split(rel.Source.Path, ":")
+				volData[volume[1]] = rel.Destination.UUID
+			}
+		}
+	}
+	for k, v := range volData {
+		fmt.Println(k, v)
+	}
+
+	folders, err := getFolders(container)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	out, err := getFolders(bucket)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	for i, v := range out {
+	for i, v := range folders {
 		fmt.Println(i+1, v)
-	}
-
-	for n, v := range run(cluster) {
-		fmt.Println(n, v)
 	}
 
 }
@@ -79,23 +97,12 @@ func clientGET(creds, url string) *http.Response {
 	return resp
 }
 
-func getFlags() (string, string, error) {
-	cluster := flag.String("c", "", "enter cluster hostname or ip")
-	bucket := flag.String("b", "", "enter the bucket the cluster is running in")
-	flag.Parse()
 
-	if *cluster == "" {
-		return "", "", fmt.Errorf("enter a cluster name")
-	}
-	if *bucket == "" {
-		return "", "", fmt.Errorf("enter a bucket name")
-	}
-	return *cluster, *bucket, nil
-}
-
-func getFolders(bucket string) ([]string, error) {
+func getFolders(container string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
+
+	bucket := "gs://test-" + container
 
 	cmd := exec.CommandContext(ctx, "gsutil", "ls", bucket)
 	output, err := cmd.CombinedOutput()
@@ -113,7 +120,7 @@ func getFolders(bucket string) ([]string, error) {
 	return ss, nil
 }
 
-func getRelationships(creds, url string) relationships {
+func getRelationships(creds, url string) (string, relationships) {
 	resp := clientGET(creds, url)
 	defer resp.Body.Close()
 
@@ -121,7 +128,18 @@ func getRelationships(creds, url string) relationships {
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		log.Fatal(err)
 	}
-	return r
+
+	var once sync.Once
+	var container string
+	for _, v := range r.Records {
+		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
+			once.Do(func(){
+				path := strings.Split(v.Destination.Path, ":")
+				container = path[0]
+			})
+		}
+	}
+	return container, r
 }
 
 func getRelationship(creds, url, uuid string) relationship {
@@ -136,21 +154,3 @@ func getRelationship(creds, url, uuid string) relationship {
 	return r
 }
 
-func run(cluster string) map[string]string {
-	creds := os.Getenv("CREDS")
-	url := "https://" + cluster + "/api/snapmirror/relationships/"
-
-	volData := make(map[string]string)
-
-	rec := getRelationships(creds, url)
-	for _, v := range rec.Records {
-		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
-			rel := getRelationship(creds, url, v.UUID)
-			if rel.UUID == v.UUID {
-				volume := strings.Split(rel.Source.Path, ":")
-				volData[volume[1]] = rel.Destination.UUID
-			}
-		}
-	}
-	return volData
-}
