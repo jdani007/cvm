@@ -46,12 +46,12 @@ type destination struct {
 func main() {
 	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
 	flag.Parse()
-	
+
 	if *cluster == "" {
 		fmt.Println("enter cluster hostname or ip")
 		os.Exit(1)
 	}
-	
+
 	creds, ok := os.LookupEnv("CREDS")
 	if !ok {
 		fmt.Println("credentials missing from environment variable 'CREDS'")
@@ -71,13 +71,13 @@ func main() {
 				log.Fatal(err)
 			}
 			if r.UUID == v.UUID {
-				vol := strings.Split(r.Source.Path, ":")
+				source := strings.Split(r.Source.Path, ":")
 				size, err := getSize(container, r.Destination.UUID)
 				if err != nil {
 					log.Fatal(err)
 				}
 				volData = append(volData, volume{
-					Name: vol[1],
+					Name: source[1],
 					UUID: r.Destination.UUID,
 					Size: size,
 				})
@@ -93,15 +93,14 @@ func main() {
 
 }
 
-
 func getSize(container, uuid string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	url := "gs://test-"+container+"/"+uuid
+	url := "gs://test-" + container + "/" + uuid
 
-	args := []string{"storage","du",url,"--summarize"}
-	
+	args := []string{"storage", "du", url, "--summarize"}
+
 	cmd := exec.CommandContext(ctx, "gcloud", args...)
 	output, err := cmd.Output()
 	if err != nil {
@@ -125,17 +124,16 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 	}
 	defer resp.Body.Close()
 
-
 	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
 		return "", "", rel, err
 	}
 
 	var once sync.Once
 	var container string
-	
+
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
-			once.Do(func(){
+			once.Do(func() {
 				path := strings.Split(v.Destination.Path, ":")
 				container = path[0]
 			})
@@ -147,13 +145,12 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 func getRelationship(creds, url, uuid string) (relationship, error) {
 	var r relationship
 
-	resp, err := clientGET(creds, url + uuid)
+	resp, err := clientGET(creds, url+uuid)
 	if err != nil {
 		return r, err
 	}
 	defer resp.Body.Close()
 
-	
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return r, err
 	}
@@ -174,7 +171,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Authorization", "Basic " + creds)
+	request.Header.Set("Authorization", "Basic "+creds)
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
