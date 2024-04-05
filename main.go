@@ -37,15 +37,19 @@ type destination struct {
 }
 
 func main() {
-	cluster := flag.String("c", "", "enter cluster hostname or ip")
+	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
 	flag.Parse()
 	
 	if *cluster == "" {
 		fmt.Println("enter cluster hostname or ip")
 		os.Exit(1)
 	}
+	creds, ok := os.LookupEnv("CREDS")
+	if !ok {
+		fmt.Println("credentials missing from environment variable 'CREDS'")
+		os.Exit(1)
+	}
 
-	creds := os.Getenv("CREDS")
 	url := "https://" + *cluster + "/api/snapmirror/relationships/"
 
 	container, rel := getRelationships(creds, url)
@@ -70,30 +74,8 @@ func main() {
 		os.Exit(1)
 	}
 	for i, v := range folders {
-		fmt.Println(i+1, v)
+		fmt.Println(i + 1, v)
 	}
-}
-
-func clientGET(creds, url string) *http.Response {
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	client := &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: transport,
-	}
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	request.Header.Set("Authorization", "Basic " + creds)
-	resp, err := client.Do(request)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return resp
 }
 
 
@@ -154,3 +136,24 @@ func getRelationship(creds, url, uuid string) relationship {
 	return r
 }
 
+func clientGET(creds, url string) *http.Response {
+
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	client := &http.Client{
+		Timeout:   time.Second * 10,
+		Transport: transport,
+	}
+
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	request.Header.Set("Authorization", "Basic " + creds)
+	resp, err := client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return resp
+}
