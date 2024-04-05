@@ -116,13 +116,16 @@ func getSize(container, uuid string) (string, error) {
 }
 
 func getRelationships(creds, cluster string) (string, string, relationships, error) {
-
+	var rel relationships
 	url := "https://" + cluster + "/api/snapmirror/relationships/"
 
-	resp := clientGET(creds, url)
+	resp, err := clientGET(creds, url)
+	if err != nil {
+		return "", "", rel, err
+	}
 	defer resp.Body.Close()
 
-	var rel relationships
+
 	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
 		return "", "", rel, err
 	}
@@ -142,18 +145,22 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 }
 
 func getRelationship(creds, url, uuid string) (relationship, error) {
+	var r relationship
 
-	resp := clientGET(creds, url + uuid)
+	resp, err := clientGET(creds, url + uuid)
+	if err != nil {
+		return r, err
+	}
 	defer resp.Body.Close()
 
-	var r relationship
+	
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		return r, err
 	}
 	return r, nil
 }
 
-func clientGET(creds, url string) *http.Response {
+func clientGET(creds, url string) (*http.Response, error) {
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -165,14 +172,14 @@ func clientGET(creds, url string) *http.Response {
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	request.Header.Set("Authorization", "Basic " + creds)
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return resp
+	return resp, nil
 }
 
 // [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
