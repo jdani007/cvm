@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -44,6 +43,7 @@ type destination struct {
 }
 
 func main() {
+
 	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
 	flag.Parse()
 
@@ -90,10 +90,10 @@ func main() {
 		fmt.Println(v.Size, v.UUID, v.Name)
 	}
 	fmt.Println()
-
 }
 
 func getSize(container, uuid string) (string, error) {
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
@@ -115,8 +115,10 @@ func getSize(container, uuid string) (string, error) {
 }
 
 func getRelationships(creds, cluster string) (string, string, relationships, error) {
-	var rel relationships
+
 	url := "https://" + cluster + "/api/snapmirror/relationships/"
+
+	var rel relationships
 
 	resp, err := clientGET(creds, url)
 	if err != nil {
@@ -128,21 +130,20 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 		return "", "", rel, err
 	}
 
-	var once sync.Once
-	var container string
 
+	var container string
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
-			once.Do(func() {
-				path := strings.Split(v.Destination.Path, ":")
-				container = path[0]
-			})
+			path := strings.Split(v.Destination.Path, ":")
+			container = path[0]
+			break
 		}
 	}
 	return container, url, rel, nil
 }
 
 func getRelationship(creds, url, uuid string) (relationship, error) {
+
 	var r relationship
 
 	resp, err := clientGET(creds, url+uuid)
@@ -182,6 +183,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 // [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
 // https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
 func prettyByteSize(bf float64) string {
+
 	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
 		if math.Abs(bf) < 1024.0 {
 			return fmt.Sprintf("%3.1f%sB", bf, unit)
