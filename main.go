@@ -151,7 +151,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 	return resp, nil
 }
 
-func mapVolToCloud(creds, container, url string, rel relationships) ([]volume, error) {
+func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, error) {
 	var volData []volume
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
@@ -239,7 +239,7 @@ func getBackupSize(creds, cluster string) ([]volume, error) {
 		return nil, err
 	}
 
-	v, err := mapVolToCloud(creds, container, url, rel)
+	v, err := mapVolToBackup(creds, container, url, rel)
 	if err != nil {
 		return nil, err
 	}
