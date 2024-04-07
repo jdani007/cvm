@@ -60,7 +60,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	volData, err := getVolData(creds, container, url, rel)
+	volData, err := mapVolData(creds, container, url, rel)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -189,7 +189,7 @@ func getCreds() string {
 	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
 }
 
-func getVolData(creds, container, url string, rel relationships) ([]volume, error) {
+func mapVolData(creds, container, url string, rel relationships) ([]volume, error) {
 	var volData []volume
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
