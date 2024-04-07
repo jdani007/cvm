@@ -67,7 +67,7 @@ func main() {
 
 	fmt.Println()
 	for _, v := range volData {
-		fmt.Println(v.Size, v.UUID, v.Name)
+		fmt.Printf("%v\t%v\n",v.Size, v.Name)
 	}
 	fmt.Println()
 }
@@ -159,9 +159,10 @@ func clientGET(creds, url string) (*http.Response, error) {
 	return resp, nil
 }
 
+
+func prettyByteSize(bf float64) string {
 // [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
 // https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
-func prettyByteSize(bf float64) string {
 
 	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
 		if math.Abs(bf) < 1024.0 {
