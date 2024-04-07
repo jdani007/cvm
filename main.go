@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -52,11 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	creds, ok := os.LookupEnv("CREDS")
-	if !ok {
-		fmt.Println("credentials missing from environment variable 'CREDS'")
-		os.Exit(1)
-	}
+	creds := getCreds()
 
 	container, url, rel, err := getRelationships(creds, *cluster)
 	if err != nil {
@@ -130,7 +127,6 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 		return "", "", rel, err
 	}
 
-
 	var container string
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
@@ -191,4 +187,20 @@ func prettyByteSize(bf float64) string {
 		bf /= 1024.0
 	}
 	return fmt.Sprintf("%.1fYiB", bf)
+}
+
+func getCreds() string {
+
+	user, ok := os.LookupEnv("netapp_user")
+	if !ok {
+		fmt.Println("credentials missing from environment variable 'netapp_user'")
+		os.Exit(1)
+	}
+	pass, ok := os.LookupEnv("netapp_pass")
+	if !ok {
+		fmt.Println("credentials missing from environment variable 'netapp_pass'")
+		os.Exit(1)
+	}
+
+	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
 }
