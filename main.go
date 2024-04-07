@@ -67,31 +67,25 @@ func main() {
 
 	fmt.Println()
 	for _, v := range volData {
-		fmt.Printf("%v\t%v\n",v.Size, v.Name)
+		fmt.Printf("%v\t%v\n", v.Size, v.Name)
 	}
 	fmt.Println()
 }
 
-func getSize(container, uuid string) (string, error) {
+func getCreds() string {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
-	url := "gs://test-" + container + "/" + uuid
-
-	args := []string{"storage", "du", url, "--summarize"}
-
-	cmd := exec.CommandContext(ctx, "gcloud", args...)
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
+	user, ok := os.LookupEnv("netapp_user")
+	if !ok {
+		fmt.Println("credentials missing from environment variable 'netapp_user'")
+		os.Exit(1)
 	}
-	result := strings.Split(string(output), " ")
-	size, err := strconv.ParseFloat(result[0], 64)
-	if err != nil {
-		return "", err
+	pass, ok := os.LookupEnv("netapp_pass")
+	if !ok {
+		fmt.Println("credentials missing from environment variable 'netapp_pass'")
+		os.Exit(1)
 	}
-	return prettyByteSize(size), nil
+
+	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
 }
 
 func getRelationships(creds, cluster string) (string, string, relationships, error) {
@@ -159,36 +153,6 @@ func clientGET(creds, url string) (*http.Response, error) {
 	return resp, nil
 }
 
-
-func prettyByteSize(bf float64) string {
-// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
-// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
-
-	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
-		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%3.1f%sB", bf, unit)
-		}
-		bf /= 1024.0
-	}
-	return fmt.Sprintf("%.1fYiB", bf)
-}
-
-func getCreds() string {
-
-	user, ok := os.LookupEnv("netapp_user")
-	if !ok {
-		fmt.Println("credentials missing from environment variable 'netapp_user'")
-		os.Exit(1)
-	}
-	pass, ok := os.LookupEnv("netapp_pass")
-	if !ok {
-		fmt.Println("credentials missing from environment variable 'netapp_pass'")
-		os.Exit(1)
-	}
-
-	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
-}
-
 func mapVolData(creds, container, url string, rel relationships) ([]volume, error) {
 	var volData []volume
 	for _, v := range rel.Records {
@@ -199,7 +163,7 @@ func mapVolData(creds, container, url string, rel relationships) ([]volume, erro
 			}
 			if r.UUID == v.UUID {
 				source := strings.Split(r.Source.Path, ":")
-				size, err := getSize(container, r.Destination.UUID)
+				size, err := getStorageSize(container, r.Destination.UUID)
 				if err != nil {
 					return nil, err
 				}
@@ -213,4 +177,39 @@ func mapVolData(creds, container, url string, rel relationships) ([]volume, erro
 	}
 
 	return volData, nil
+}
+
+func getStorageSize(container, uuid string) (string, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	url := "gs://test-" + container + "/" + uuid
+
+	args := []string{"storage", "du", url, "--summarize"}
+
+	cmd := exec.CommandContext(ctx, "gcloud", args...)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	result := strings.Split(string(output), " ")
+	size, err := strconv.ParseFloat(result[0], 64)
+	if err != nil {
+		return "", err
+	}
+	return prettyByteSize(size), nil
+}
+
+func prettyByteSize(bf float64) string {
+	// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
+	// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
+
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(bf) < 1024.0 {
+			return fmt.Sprintf("%3.1f%sB", bf, unit)
+		}
+		bf /= 1024.0
+	}
+	return fmt.Sprintf("%.1fYiB", bf)
 }
