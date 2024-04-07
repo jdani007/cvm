@@ -60,26 +60,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var volData []volume
-	for _, v := range rel.Records {
-		if strings.HasPrefix(v.Destination.Path, container) {
-			r, err := getRelationship(creds, url, v.UUID)
-			if err != nil {
-				log.Fatal(err)
-			}
-			if r.UUID == v.UUID {
-				source := strings.Split(r.Source.Path, ":")
-				size, err := getSize(container, r.Destination.UUID)
-				if err != nil {
-					log.Fatal(err)
-				}
-				volData = append(volData, volume{
-					Name: source[1],
-					UUID: r.Destination.UUID,
-					Size: size,
-				})
-			}
-		}
+	volData, err := getVolData(creds, container, url, rel)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Println()
@@ -203,4 +186,30 @@ func getCreds() string {
 	}
 
 	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+}
+
+func getVolData(creds, container, url string, rel relationships) ([]volume, error) {
+	var volData []volume
+	for _, v := range rel.Records {
+		if strings.HasPrefix(v.Destination.Path, container) {
+			r, err := getRelationship(creds, url, v.UUID)
+			if err != nil {
+				return nil, err
+			}
+			if r.UUID == v.UUID {
+				source := strings.Split(r.Source.Path, ":")
+				size, err := getSize(container, r.Destination.UUID)
+				if err != nil {
+					return nil, err
+				}
+				volData = append(volData, volume{
+					Name: source[1],
+					UUID: r.Destination.UUID,
+					Size: size,
+				})
+			}
+		}
+	}
+
+	return volData, nil
 }
