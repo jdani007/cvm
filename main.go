@@ -30,7 +30,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	creds := getCreds()
+	creds, err := getCreds()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	var volData []volume
 
@@ -51,20 +55,18 @@ func main() {
 	fmt.Println()
 }
 
-func getCreds() string {
+func getCreds() (string, error) {
 
 	user, ok := os.LookupEnv("netapp_user")
 	if !ok {
-		fmt.Println("credentials missing from environment variable 'netapp_user'")
-		os.Exit(1)
+		return "", fmt.Errorf("missing environment variable for 'netapp_user'")
 	}
 	pass, ok := os.LookupEnv("netapp_pass")
 	if !ok {
-		fmt.Println("credentials missing from environment variable 'netapp_pass'")
-		os.Exit(1)
+		return "", fmt.Errorf("missing environment variable for 'netapp_pass'")
 	}
 
-	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass)), nil
 }
 
 func clientGET(creds, url string) (*http.Response, error) {
@@ -143,4 +145,3 @@ func getFlags() (string, string, error) {
 
 	return *cluster, *service, nil
 }
-
