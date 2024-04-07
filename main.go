@@ -45,24 +45,22 @@ type destination struct {
 
 func main() {
 
-	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
-	flag.Parse()
-
-	if *cluster == "" {
-		fmt.Println("enter cluster hostname or ip")
+	cluster, service, err := getFlags()
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	creds := getCreds()
 
-	container, url, rel, err := getRelationships(creds, *cluster)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var volData []volume
 
-	volData, err := mapVolData(creds, container, url, rel)
-	if err != nil {
-		log.Fatal(err)
+	switch service {
+	case "backup":
+		volData, err = getBackupSize(creds, cluster)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	fmt.Println()
@@ -153,7 +151,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 	return resp, nil
 }
 
-func mapVolData(creds, container, url string, rel relationships) ([]volume, error) {
+func mapVolToCloud(creds, container, url string, rel relationships) ([]volume, error) {
 	var volData []volume
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
@@ -212,4 +210,39 @@ func prettyByteSize(bf float64) string {
 		bf /= 1024.0
 	}
 	return fmt.Sprintf("%.1fYiB", bf)
+}
+
+func getFlags() (string, string, error) {
+
+	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
+	service := flag.String("service", "backup", "enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+	flag.Parse()
+
+	if *cluster == "" {
+		return "", "", fmt.Errorf("enter cluster hostname or ip")
+	}
+	if *service == "" {
+		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+	}
+
+	if *service != "backup" && *service != "tiering" {
+		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+	}
+
+	return *cluster, *service, nil
+}
+
+func getBackupSize(creds, cluster string) ([]volume, error) {
+
+	container, url, rel, err := getRelationships(creds, cluster)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := mapVolToCloud(creds, container, url, rel)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
