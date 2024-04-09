@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	creds, err := getCreds()
+	creds, err := getCredentials()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -55,7 +55,7 @@ func main() {
 	fmt.Println()
 }
 
-func getCreds() (string, error) {
+func getCredentials() (string, error) {
 
 	user, ok := os.LookupEnv("netapp_user")
 	if !ok {
