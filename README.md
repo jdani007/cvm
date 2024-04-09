@@ -17,7 +17,7 @@ output
 ```bash
 ./mapstorage -cluster 192.168.0.1
 
-7.7GiB	temp_delete_me_too
-15.4GiB	temp_delete_me
-1.7GiB	temp_delete_me_as_well
+7.7GB	temp_delete_me_too
+15.4GB	temp_delete_me
+1.7GB	temp_delete_me_as_well
 ```
