@@ -42,6 +42,7 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 	}
 
 	var container string
+
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, "netapp-backup") {
 			path := strings.Split(v.Destination.Path, ":")
@@ -69,7 +70,9 @@ func getRelationship(creds, url, uuid string) (relationship, error) {
 }
 
 func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, error) {
+
 	var volData []volume
+
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
 			r, err := getRelationship(creds, url, v.UUID)
@@ -90,7 +93,6 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, 
 			}
 		}
 	}
-
 	return volData, nil
 }
 

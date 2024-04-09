@@ -138,7 +138,6 @@ func getFlags() (string, string, error) {
 	if *service == "" {
 		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 	}
-
 	if *service != "backup" && *service != "tiering" {
 		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 	}
