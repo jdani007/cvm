@@ -117,7 +117,7 @@ func prettyByteSize(bf float64) string {
 	// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
 	// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
 
-	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
 			return fmt.Sprintf("%3.1f%sB", bf, unit)
 		}
