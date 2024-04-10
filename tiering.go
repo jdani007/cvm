@@ -22,12 +22,12 @@ type target struct {
 }
 
 type volumes struct {
-	Records    []volume `json:"records"`
+	Records []volume `json:"records"`
 }
 
 type volume struct {
-	Name string `json:"volume"`
-	UUID string `json:"uuid"`
+	Name   string `json:"volume"`
+	UUID   string `json:"uuid"`
 	Server string `json:"vserver"`
 }
 
@@ -36,12 +36,10 @@ type objectStore struct {
 }
 
 type btUUID struct {
-	OsName        string `json:"object_store_name"`
+	OsName      string `json:"object_store_name"`
 	BuftreeUUID string `json:"buftree_uuid"`
 	VolUUID     string `json:"vol_uuid"`
-	}
-
-
+}
 
 func getTargets(creds, cluster string) (string, targets, error) {
 
@@ -56,44 +54,43 @@ func getTargets(creds, cluster string) (string, targets, error) {
 	defer resp.Body.Close()
 
 	if err := json.NewDecoder(resp.Body).Decode(&t); err != nil {
-	return "", t, err
+		return "", t, err
 	}
 
-	return url, t, nil 
+	return url, t, nil
 }
 
 func getTarget(creds, cluster string) (string, string, string, error) {
 
-	url, ts, err := getTargets(creds,cluster)
+	url, ts, err := getTargets(creds, cluster)
 	if err != nil {
-		return "","","", err
+		return "", "", "", err
 	}
 
 	var container, clusterName, name string
 	for _, v := range ts.Records {
 		if v.Name == "StorageAccount" {
-			resp, err := clientGET(creds, url + v.UUID)
+			resp, err := clientGET(creds, url+v.UUID)
 			if err != nil {
-				return  "","","", err
+				return "", "", "", err
 			}
 			defer resp.Body.Close()
 
 			var t target
 			if err := json.NewDecoder(resp.Body).Decode(&t); err != nil {
-				return "","","", err
+				return "", "", "", err
 			}
 			name = v.Name
 			container = t.Container
 			clusterName = t.Cluster.Name
 		}
 	}
-	return container, clusterName, name,  nil
-} 
-
+	return container, clusterName, name, nil
+}
 
 func getVolumes(creds, cluster string) (volumes, error) {
 	url := "https://" + cluster + "/api/private/cli/volume/?fields=uuid,volume"
-		 
+
 	var v volumes
 
 	resp, err := clientGET(creds, url)
@@ -109,7 +106,6 @@ func getVolumes(creds, cluster string) (volumes, error) {
 	return v, nil
 }
 
-
 func getVolList(creds, cluster, clusterName string) ([]volume, error) {
 	vols, err := getVolumes(creds, cluster)
 	if err != nil {
@@ -118,13 +114,13 @@ func getVolList(creds, cluster, clusterName string) ([]volume, error) {
 
 	var svol []volume
 	for _, v := range vols.Records {
-		if v.Server == "svm_" + clusterName {
+		if v.Server == "svm_"+clusterName {
 			if strings.HasPrefix(v.Name, "svm_") {
 				continue
 			}
 			svol = append(svol, volume{
-				Name: v.Name,
-				UUID: v.UUID,
+				Name:   v.Name,
+				UUID:   v.UUID,
 				Server: v.Server,
 			})
 		}
@@ -160,15 +156,14 @@ func getBtUUidList(creds, cluster, osName string) ([]btUUID, error) {
 	for _, v := range os.Records {
 		if v.OsName == osName {
 			b = append(b, btUUID{
-				OsName: v.OsName,
+				OsName:      v.OsName,
 				BuftreeUUID: v.BuftreeUUID,
-				VolUUID: v.VolUUID,
+				VolUUID:     v.VolUUID,
 			})
 		}
 	}
 	return b, nil
 }
-
 
 func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeData, error) {
 	var voldata []volumeData
@@ -191,15 +186,14 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 	return voldata, nil
 }
 
-
-func getTieringSize(creds, cluster string) ([]volumeData, error)  {
+func getTieringSize(creds, cluster string) ([]volumeData, error) {
 	container, clusterName, osName, err := getTarget(creds, cluster)
 	if err != nil {
 		return nil, err
 	}
 	// fmt.Println(container)
 
-	vols, err := getVolList(creds, cluster, clusterName) 
+	vols, err := getVolList(creds, cluster, clusterName)
 	if err != nil {
 		return nil, err
 	}
