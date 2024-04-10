@@ -10,7 +10,9 @@ usage:
 ```bash
 Usage of ./mapstorage:
   -cluster string
-        enter cluster hostname or ip
+    	enter cluster hostname or ip
+  -service string
+    	enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
 ```
 
 output
