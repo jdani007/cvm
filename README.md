@@ -2,7 +2,7 @@
 
 Determine Google cloud storage per volume usage for Netapp Cloud Backup
 
-still work in progress
+still work in progress for tiering service
 
 output
 
