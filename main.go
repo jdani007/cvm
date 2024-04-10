@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-type volume struct {
+type volumeData struct {
 	Name string
 	UUID string
 	Size string
@@ -36,7 +36,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var volData []volume
+	var volData []volumeData
 
 	switch service {
 	case "backup":

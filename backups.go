@@ -69,9 +69,9 @@ func getRelationship(creds, url, uuid string) (relationship, error) {
 	return r, nil
 }
 
-func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, error) {
+func mapVolToBackup(creds, container, url string, rel relationships) ([]volumeData, error) {
 
-	var volData []volume
+	var volData []volumeData
 
 	for _, v := range rel.Records {
 		if strings.HasPrefix(v.Destination.Path, container) {
@@ -85,7 +85,7 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, 
 				if err != nil {
 					return nil, err
 				}
-				volData = append(volData, volume{
+				volData = append(volData, volumeData{
 					Name: source[1],
 					UUID: r.Destination.UUID,
 					Size: size,
@@ -96,7 +96,7 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volume, 
 	return volData, nil
 }
 
-func getBackupSize(creds, cluster string) ([]volume, error) {
+func getBackupSize(creds, cluster string) ([]volumeData, error) {
 
 	container, url, rel, err := getRelationships(creds, cluster)
 	if err != nil {
@@ -110,3 +110,4 @@ func getBackupSize(creds, cluster string) ([]volume, error) {
 
 	return v, nil
 }
+
