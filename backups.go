@@ -89,6 +89,7 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volumeDa
 					Name: source[1],
 					UUID: r.Destination.UUID,
 					Size: size,
+					Server: source[0],
 				})
 			}
 		}

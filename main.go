@@ -14,17 +14,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/xuri/excelize/v2"
 )
 
 type volumeData struct {
 	Name string
 	UUID string
 	Size string
+	Server string
 }
 
 func main() {
 
-	cluster, service, err := getFlags()
+	cluster, service, export, err := getFlags()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -49,12 +52,17 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	default:
-		fmt.Println("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
-		return
 	}
 
-	formatOutput(service, volData)
+	if export {
+		if err := exportExcelFile(service, volData); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		formatOutput(service, volData)
+	}
+
+
 }
 
 func getCredentials() (string, error) {
@@ -128,32 +136,77 @@ func prettyByteSize(bf float64) string {
 	return fmt.Sprintf("%.1fYiB", bf)
 }
 
-func getFlags() (string, string, error) {
+func getFlags() (string, string, bool, error) {
 
 	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
 	service := flag.String("service", "backup", "enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+	export := flag.Bool("export", false, "export the excel file")
 	flag.Parse()
 
 	if *cluster == "" {
-		return "", "", fmt.Errorf("enter cluster hostname or ip")
+		return "", "", false, fmt.Errorf("enter cluster hostname or ip")
 	}
 	if *service == "" {
-		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+		return "", "", false, fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 	}
 	if *service != "backup" && *service != "tiering" {
-		return "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+		return "", "", false, fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 	}
 
-	return *cluster, *service, nil
+	return *cluster, *service, *export, nil
 }
 
 
 func formatOutput(service string, volData []volumeData) {
+
 	fmt.Printf("\nVolume Size for %v:\n\n", service)
 	fmt.Printf("Size\t Volume Name\n")
-	fmt.Printf("------\t --------------------------\n")
+	fmt.Printf("------\t --------------\n")
 	for _, v := range volData {
 		fmt.Printf("%v\t %v\n", v.Size, v.Name)
 	}
-	fmt.Printf("-----------------------------------\n\n")
+	fmt.Println()
+}
+
+func exportExcelFile(service string, volData []volumeData) error {
+	f := excelize.NewFile()
+	defer func() error {
+		if err := f.Close(); err != nil {
+			return err
+		}
+		return nil
+	}()
+	if err := f.SetSheetName("Sheet1",service); err != nil {
+		return err
+	}
+	if err := f.SetCellValue(service, "A1", "Server"); err != nil {
+		return err
+	}
+	if err := f.SetCellValue(service, "B1", "Volume Name"); err != nil {
+		return err
+	}
+	if err := f.SetCellValue(service, "C1", "Size"); err != nil {
+		return err
+	}
+	if err := f.SetCellValue(service, "D1", "UUID"); err != nil {
+		return err
+	}
+
+
+	for i, v := range volData {
+		if err := f.SetCellValue(service,"A"+fmt.Sprint(i+2),v.Server); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(service,"B"+fmt.Sprint(i+2),v.Name); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(service,"C"+fmt.Sprint(i+2),v.Size); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(service,"D"+fmt.Sprint(i+2),v.UUID); err != nil {
+			return err
+		}
+	}
+
+	return f.SaveAs(service+".xlsx")
 }

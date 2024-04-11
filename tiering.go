@@ -179,6 +179,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 					Name: v1.Name,
 					UUID: v2.BuftreeUUID,
 					Size: size,
+					Server: v1.Server,
 				})
 			}
 		}
@@ -187,7 +188,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 }
 
 func getTieringSize(creds, cluster string) ([]volumeData, error) {
-	
+
 	container, clusterName, osName, err := getTarget(creds, cluster)
 	if err != nil {
 		return nil, err
