@@ -44,7 +44,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	case "tiering":
+		volData, err = getTieringSize(creds, cluster)
+		if err != nil {
+			log.Fatal(err)
+		}
 	default:
+		fmt.Println("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 		return
 	}
 
