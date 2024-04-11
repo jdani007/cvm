@@ -173,7 +173,7 @@ func exportCSVFile(service string, volData []volumeData) error {
 
 	fileName := service + "-" + timeStamp + ".csv"
 
-	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
