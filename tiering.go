@@ -211,4 +211,3 @@ func getTieringSize(creds, cluster string) ([]volumeData, error) {
 
 	return v, nil
 }
-
