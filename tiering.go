@@ -166,7 +166,7 @@ func getBtUUidList(creds, cluster, osName string) ([]btUUID, error) {
 }
 
 func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeData, error) {
-	var voldata []volumeData
+	var volData []volumeData
 
 	for _, v1 := range vols {
 		for _, v2 := range btus {
@@ -175,7 +175,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 				if err != nil {
 					return nil, err
 				}
-				voldata = append(voldata, volumeData{
+				volData = append(volData, volumeData{
 					Name:   v1.Name,
 					UUID:   v2.BuftreeUUID,
 					Size:   size,
@@ -184,7 +184,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 			}
 		}
 	}
-	return voldata, nil
+	return volData, nil
 }
 
 func getTieringSize(creds, cluster string) ([]volumeData, error) {
