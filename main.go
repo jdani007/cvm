@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -155,13 +156,15 @@ func getFlags() (string, string, bool, error) {
 
 func formatOutput(service string, volData []volumeData) {
 
-	fmt.Printf("\nVolume Size for %v:\n\n", service)
-	fmt.Printf("Size\t Volume Name\n")
-	fmt.Printf("------\t --------------\n")
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+	defer w.Flush()
+	fmt.Fprintf(w,"\nVolume Size for %v:\n", service)
+	fmt.Fprintln(w, "\nSize\tVolume Name\tUUID\t")
+	fmt.Fprintln(w, "-----\t------------\t-----\t")
 	for _, v := range volData {
-		fmt.Printf("%v\t %v\n", v.Size, v.Name)
+		fmt.Fprintf(w, "%v\t%v\t%v\t\n", v.Size, v.Name, v.UUID)
 	}
-	fmt.Println()
+	fmt.Fprintln(w)
 }
 
 func exportCSVFile(service string, volData []volumeData) error {
