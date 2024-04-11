@@ -94,7 +94,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 	request.Header.Set("Authorization", "Basic "+creds)
 	resp, err := client.Do(request)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return resp, nil
 }
@@ -158,6 +158,7 @@ func formatOutput(service string, volData []volumeData) {
 
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
 	defer w.Flush()
+
 	fmt.Fprintf(w,"\nVolume Size for %v:\n", strings.Title(service))
 	fmt.Fprintln(w, "\nSize\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "-----\t------------\t-----\t")
@@ -190,6 +191,5 @@ func exportCSVFile(service string, volData []volumeData) error {
 	if _, err := f.WriteString("\nFile generated on " + timeStamp); err != nil {
 		return err
 	}
-
 	return nil
 }
