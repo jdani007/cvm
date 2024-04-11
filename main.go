@@ -158,7 +158,7 @@ func formatOutput(service string, volData []volumeData) {
 
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
 	defer w.Flush()
-	fmt.Fprintf(w,"\nVolume Size for %v:\n", service)
+	fmt.Fprintf(w,"\nVolume Size for %v:\n", strings.Title(service))
 	fmt.Fprintln(w, "\nSize\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "-----\t------------\t-----\t")
 	for _, v := range volData {
