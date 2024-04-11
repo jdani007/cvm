@@ -54,11 +54,7 @@ func main() {
 		return
 	}
 
-	fmt.Println()
-	for _, v := range volData {
-		fmt.Printf("%v\t%v\n", v.Size, v.Name)
-	}
-	fmt.Println()
+	formatOutput(service, volData)
 }
 
 func getCredentials() (string, error) {
@@ -149,4 +145,15 @@ func getFlags() (string, string, error) {
 	}
 
 	return *cluster, *service, nil
+}
+
+
+func formatOutput(service string, volData []volumeData) {
+	fmt.Printf("\nVolume Size for %v:\n\n", service)
+	fmt.Printf("Size\t Volume Name\n")
+	fmt.Printf("------\t --------------------------\n")
+	for _, v := range volData {
+		fmt.Printf("%v\t %v\n", v.Size, v.Name)
+	}
+	fmt.Printf("-----------------------------------\n\n")
 }
