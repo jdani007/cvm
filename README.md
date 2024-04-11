@@ -7,7 +7,7 @@ still work in progress for tiering service
 output
 
 usage:
-```bash
+```
 Usage of ./mapstorage:
   -cluster string
         enter cluster hostname or ip
@@ -18,7 +18,7 @@ Usage of ./mapstorage:
 ```
 
 output
-```bash
+```
 ./mapstorage -cluster 192.168.0.1
 
 Volume Size for Backup:
