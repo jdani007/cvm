@@ -121,9 +121,9 @@ func getStorageSize(container, uuid string) (string, error) {
 	return prettyByteSize(size), nil
 }
 
+// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
+// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
 func prettyByteSize(bf float64) string {
-	// [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB
-	// https://gist.github.com/anikitenko/b41206a49727b83a530142c76b1cb82d?permalink_comment_id=4467913#gistcomment-4467913
 
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
@@ -138,7 +138,7 @@ func getFlags() (string, string, bool, error) {
 
 	cluster := flag.String("cluster", "", "enter cluster hostname or ip")
 	service := flag.String("service", "backup", "enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
-	export := flag.Bool("export", false, "export the excel file")
+	export := flag.Bool("export", false, "export to csv file")
 	flag.Parse()
 
 	if *cluster == "" {
