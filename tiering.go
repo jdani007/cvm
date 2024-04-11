@@ -176,9 +176,9 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 					return nil, err
 				}
 				voldata = append(voldata, volumeData{
-					Name: v1.Name,
-					UUID: v2.BuftreeUUID,
-					Size: size,
+					Name:   v1.Name,
+					UUID:   v2.BuftreeUUID,
+					Size:   size,
 					Server: v1.Server,
 				})
 			}

@@ -14,14 +14,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/xuri/excelize/v2"
 )
 
 type volumeData struct {
-	Name string
-	UUID string
-	Size string
+	Name   string
+	UUID   string
+	Size   string
 	Server string
 }
 
@@ -55,13 +53,12 @@ func main() {
 	}
 
 	if export {
-		if err := exportExcelFile(service, volData); err != nil {
+		if err := exportCSVFile(service, volData); err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		formatOutput(service, volData)
 	}
-
 
 }
 
@@ -156,7 +153,6 @@ func getFlags() (string, string, bool, error) {
 	return *cluster, *service, *export, nil
 }
 
-
 func formatOutput(service string, volData []volumeData) {
 
 	fmt.Printf("\nVolume Size for %v:\n\n", service)
@@ -168,45 +164,29 @@ func formatOutput(service string, volData []volumeData) {
 	fmt.Println()
 }
 
-func exportExcelFile(service string, volData []volumeData) error {
-	f := excelize.NewFile()
-	defer func() error {
-		if err := f.Close(); err != nil {
+func exportCSVFile(service string, volData []volumeData) error {
+
+	timeStamp := time.Now().Format("01-02-2006-150405")
+
+	fileName := service + "-" + timeStamp + ".csv"
+
+	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := f.WriteString("Server,Volume Name,Size,UUID\n"); err != nil {
+		return err
+	}
+	for _, v := range volData {
+		if _, err := f.WriteString(v.Server + "," + v.Name + "," + v.Size + "," + v.UUID + "\n"); err != nil {
 			return err
 		}
-		return nil
-	}()
-	if err := f.SetSheetName("Sheet1",service); err != nil {
-		return err
 	}
-	if err := f.SetCellValue(service, "A1", "Server"); err != nil {
-		return err
-	}
-	if err := f.SetCellValue(service, "B1", "Volume Name"); err != nil {
-		return err
-	}
-	if err := f.SetCellValue(service, "C1", "Size"); err != nil {
-		return err
-	}
-	if err := f.SetCellValue(service, "D1", "UUID"); err != nil {
+	if _, err := f.WriteString("\nFile generated on " + timeStamp); err != nil {
 		return err
 	}
 
-
-	for i, v := range volData {
-		if err := f.SetCellValue(service,"A"+fmt.Sprint(i+2),v.Server); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(service,"B"+fmt.Sprint(i+2),v.Name); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(service,"C"+fmt.Sprint(i+2),v.Size); err != nil {
-			return err
-		}
-		if err := f.SetCellValue(service,"D"+fmt.Sprint(i+2),v.UUID); err != nil {
-			return err
-		}
-	}
-
-	return f.SaveAs(service+".xlsx")
+	return nil
 }
