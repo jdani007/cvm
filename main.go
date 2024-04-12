@@ -87,7 +87,7 @@ func clientGET(creds, url string) (*http.Response, error) {
 		Transport: transport,
 	}
 
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
