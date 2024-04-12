@@ -131,7 +131,7 @@ func prettyByteSize(bf float64) string {
 
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%3.1f%sB", bf, unit)
+			return fmt.Sprintf("%3.2f%sB", bf, unit)
 		}
 		bf /= 1024.0
 	}
@@ -160,7 +160,7 @@ func getFlags() (string, string, bool, error) {
 
 func formatOutput(service string, volData []volumeData) {
 
-	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 	defer w.Flush()
 
 	fmt.Fprintf(w,"\nVolume Size for %v:\n", strings.Title(service))
