@@ -2,6 +2,10 @@
 
 Determine Google cloud storage per volume usage for Netapp Cloud Backup
 
+This tool is wrapper around the gcloud cli tool which summarizes the value returned by the du subcommand.
+
+"gcloud storage du _'URL'_ --summarize"
+
 ## *** in testing ***
 
 Usage:
