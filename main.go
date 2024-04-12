@@ -93,10 +93,14 @@ func clientGET(creds, url string) (*http.Response, error) {
 	}
 	request.Header.Set("Authorization", "Basic "+creds)
 	resp, err := client.Do(request)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf(resp.Status)
+		} else {
+			return resp, nil
+		}
 	}
-	return resp, nil
+	return nil, err
 }
 
 func getStorageSize(container, uuid string) (string, error) {
