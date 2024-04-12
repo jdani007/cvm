@@ -94,10 +94,10 @@ func getHTTPClient(creds, url string) (*http.Response, error) {
 	request.Header.Set("Authorization", "Basic "+creds)
 	resp, err := client.Do(request)
 	if err == nil {
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf(resp.Status)
-		} else {
+		if resp.StatusCode == http.StatusOK {
 			return resp, nil
+		} else {
+			return nil, fmt.Errorf(resp.Status)
 		}
 	}
 	return nil, err
