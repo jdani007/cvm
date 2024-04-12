@@ -1,6 +1,6 @@
 # mapstorage
 
-Determine Google cloud storage per volume usage for Netapp Cloud Backup
+Determine Google cloud storage per volume usage for Netapp Cloud Backup and Cloud Tiering.
 
 This tool is wrapper around the gcloud cli tool which summarizes the value returned by the du subcommand.
 
