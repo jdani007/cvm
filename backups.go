@@ -31,7 +31,7 @@ func getRelationships(creds, cluster string) (string, string, relationships, err
 
 	var rel relationships
 
-	resp, err := clientGET(creds, url)
+	resp, err := getHTTPClient(creds, url)
 	if err != nil {
 		return "", "", rel, err
 	}
@@ -57,7 +57,7 @@ func getRelationship(creds, url, uuid string) (relationship, error) {
 
 	var r relationship
 
-	resp, err := clientGET(creds, url+uuid)
+	resp, err := getHTTPClient(creds, url+uuid)
 	if err != nil {
 		return r, err
 	}

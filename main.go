@@ -77,7 +77,7 @@ func getCredentials() (string, error) {
 	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass)), nil
 }
 
-func clientGET(creds, url string) (*http.Response, error) {
+func getHTTPClient(creds, url string) (*http.Response, error) {
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}

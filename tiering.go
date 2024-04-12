@@ -47,7 +47,7 @@ func getTargets(creds, cluster string) (string, targets, error) {
 
 	var t targets
 
-	resp, err := clientGET(creds, url)
+	resp, err := getHTTPClient(creds, url)
 	if err != nil {
 		return "", t, err
 	}
@@ -70,7 +70,7 @@ func getTarget(creds, cluster string) (string, string, string, error) {
 	var container, clusterName, name string
 	for _, v := range ts.Records {
 		if v.Name == "StorageAccount" {
-			resp, err := clientGET(creds, url+v.UUID)
+			resp, err := getHTTPClient(creds, url+v.UUID)
 			if err != nil {
 				return "", "", "", err
 			}
@@ -93,7 +93,7 @@ func getVolumes(creds, cluster string) (volumes, error) {
 
 	var v volumes
 
-	resp, err := clientGET(creds, url)
+	resp, err := getHTTPClient(creds, url)
 	if err != nil {
 		return v, err
 	}
@@ -132,7 +132,7 @@ func getObjectStore(creds, cluster string) (objectStore, error) {
 	url := "https://" + cluster + "/api/private/cli/storage/aggregate/object-store/vol-btuuids?fields=buftree_uuid,vol_uuid"
 
 	var o objectStore
-	resp, err := clientGET(creds, url)
+	resp, err := getHTTPClient(creds, url)
 	if err != nil {
 		return o, err
 	}
