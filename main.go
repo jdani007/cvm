@@ -105,8 +105,7 @@ func getHTTPClient(creds, url string) (*http.Response, error) {
 
 func getStorageSize(container, uuid string) (string, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+	ctx := context.Background()
 
 	url := "gs://" + container + "/" + uuid
 
