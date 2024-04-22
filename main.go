@@ -108,7 +108,7 @@ func getStorageSize(container, uuid string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	url := "gs://test-" + container + "/" + uuid
+	url := "gs://" + container + "/" + uuid
 
 	args := []string{"storage", "du", url, "--summarize"}
 
@@ -163,7 +163,7 @@ func formatOutput(service string, volData []volumeData) {
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 	defer w.Flush()
 
-	fmt.Fprintf(w,"\nVolume Size for %v:\n", strings.Title(service))
+	fmt.Fprintf(w, "\nVolume Size for %v:\n", strings.Title(service))
 	fmt.Fprintln(w, "\nSize\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "-----\t------------\t-----\t")
 	for _, v := range volData {
