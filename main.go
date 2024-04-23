@@ -122,7 +122,7 @@ func getStorageClient() (*storage.Client, error) {
 
 func getStorageSize(container, uuid string, client *storage.Client) (string, error) {
 
-	bucket := client.Bucket(container)
+	bucket := client.Bucket("test-"+container)
 
 	it := bucket.Objects(context.Background(), &storage.Query{
 		Prefix: uuid + "/",
@@ -182,10 +182,10 @@ func formatOutput(service string, volData []volumeData) {
 	defer w.Flush()
 
 	fmt.Fprintf(w, "\nVolume Size for %v:\n", strings.Title(service))
-	fmt.Fprintln(w, "\nSize\tVolume Name\tUUID\t")
-	fmt.Fprintln(w, "-----\t------------\t-----\t")
-	for _, v := range volData {
-		fmt.Fprintf(w, "%v\t%v\t%v\t\n", v.Size, v.Name, v.UUID)
+	fmt.Fprintln(w, "\n   Size\tVolume Name\tUUID\t")
+	fmt.Fprintln(w, "   -----\t------------\t-----\t")
+	for i, v := range volData {
+		fmt.Fprintf(w, "%v  %v\t%v\t%v\t\n",i+1, v.Size, v.Name, v.UUID)
 	}
 	fmt.Fprintln(w)
 }
