@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"strings"
+
+	"cloud.google.com/go/storage"
 )
 
 type targets struct {
@@ -165,13 +167,13 @@ func getBtUUidList(creds, cluster, osName string) ([]btUUID, error) {
 	return b, nil
 }
 
-func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeData, error) {
+func mapVolToTiering(container string, vols []volume, btus []btUUID, client *storage.Client) ([]volumeData, error) {
 	var volData []volumeData
 
 	for _, v1 := range vols {
 		for _, v2 := range btus {
 			if v1.UUID == v2.VolUUID {
-				size, err := getStorageSize(container, v2.BuftreeUUID)
+				size, err := getStorageSize(container, v2.BuftreeUUID, client)
 				if err != nil {
 					return nil, err
 				}
@@ -187,7 +189,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID) ([]volumeDa
 	return volData, nil
 }
 
-func getTieringSize(creds, cluster string) ([]volumeData, error) {
+func getTieringSize(creds, cluster string, client *storage.Client) ([]volumeData, error) {
 
 	container, clusterName, osName, err := getTarget(creds, cluster)
 	if err != nil {
@@ -204,7 +206,7 @@ func getTieringSize(creds, cluster string) ([]volumeData, error) {
 		return nil, err
 	}
 
-	v, err := mapVolToTiering(container, vols, btus)
+	v, err := mapVolToTiering(container, vols, btus, client)
 	if err != nil {
 		return nil, err
 	}

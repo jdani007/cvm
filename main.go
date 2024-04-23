@@ -10,11 +10,14 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"os/exec"
-	"strconv"
+	// "os/exec"
+	// "strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
+
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 )
 
 type volumeData struct {
@@ -38,16 +41,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	client, err := getStorageClient()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	var volData []volumeData
 
 	switch service {
 	case "backup":
-		volData, err = getBackupSize(creds, cluster)
+		volData, err = getBackupSize(creds, cluster, client)
 		if err != nil {
 			log.Fatal(err)
 		}
 	case "tiering":
-		volData, err = getTieringSize(creds, cluster)
+		volData, err = getTieringSize(creds, cluster, client)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -103,25 +112,35 @@ func getHTTPClient(creds, url string) (*http.Response, error) {
 	return nil, err
 }
 
-func getStorageSize(container, uuid string) (string, error) {
-
-	ctx := context.Background()
-
-	url := "gs://" + container + "/" + uuid
-
-	args := []string{"storage", "du", url, "--summarize"}
-
-	cmd := exec.CommandContext(ctx, "gcloud", args...)
-	output, err := cmd.Output()
+func getStorageClient() (*storage.Client, error) {
+	c, err := storage.NewClient(context.Background())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	result := strings.Split(string(output), " ")
-	size, err := strconv.ParseFloat(result[0], 64)
-	if err != nil {
-		return "", err
+	return c, nil
+}
+
+func getStorageSize(container, uuid string, client *storage.Client) (string, error) {
+
+	bucket := client.Bucket(container)
+
+	it := bucket.Objects(context.Background(), &storage.Query{
+		Prefix: uuid + "/",
+	})
+
+	var size int64
+	for {
+		attrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		size += attrs.Size
 	}
-	return prettyByteSize(size), nil
+
+	return prettyByteSize(float64(size)), nil
 }
 
 // [Golang] Convert size in bytes to Bytes, Kilobytes, Megabytes, GB and TB

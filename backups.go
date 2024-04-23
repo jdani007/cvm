@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"strings"
+
+	"cloud.google.com/go/storage"
 )
 
 type relationships struct {
@@ -69,7 +71,7 @@ func getRelationship(creds, url, uuid string) (relationship, error) {
 	return r, nil
 }
 
-func mapVolToBackup(creds, container, url string, rel relationships) ([]volumeData, error) {
+func mapVolToBackup(creds, container, url string, rel relationships, client *storage.Client) ([]volumeData, error) {
 
 	var volData []volumeData
 
@@ -81,7 +83,7 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volumeDa
 			}
 			if r.UUID == v.UUID {
 				source := strings.Split(r.Source.Path, ":")
-				size, err := getStorageSize(container, r.Destination.UUID)
+				size, err := getStorageSize(container, r.Destination.UUID, client)
 				if err != nil {
 					return nil, err
 				}
@@ -97,14 +99,14 @@ func mapVolToBackup(creds, container, url string, rel relationships) ([]volumeDa
 	return volData, nil
 }
 
-func getBackupSize(creds, cluster string) ([]volumeData, error) {
+func getBackupSize(creds, cluster string, client *storage.Client) ([]volumeData, error) {
 
 	container, url, rel, err := getRelationships(creds, cluster)
 	if err != nil {
 		return nil, err
 	}
 
-	v, err := mapVolToBackup(creds, container, url, rel)
+	v, err := mapVolToBackup(creds, container, url, rel, client)
 	if err != nil {
 		return nil, err
 	}
