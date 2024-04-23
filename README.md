@@ -2,8 +2,6 @@
 
 Determine Google cloud storage per volume usage for Netapp Cloud Backup and Cloud Tiering.
 
-## *** in testing ***
-
 Usage:
 ```
 Usage of ./mapstorage:
