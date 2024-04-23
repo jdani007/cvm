@@ -10,8 +10,6 @@ import (
 	"math"
 	"net/http"
 	"os"
-	// "os/exec"
-	// "strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -149,7 +147,7 @@ func prettyByteSize(bf float64) string {
 
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%3.2f%sB", bf, unit)
+			return fmt.Sprintf("%.3g%sB", bf, unit)
 		}
 		bf /= 1024.0
 	}
@@ -181,7 +179,7 @@ func formatOutput(service string, volData []volumeData) {
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 	defer w.Flush()
 
-	fmt.Fprintf(w, "\nVolume Size for %v:\n", strings.Title(service))
+	fmt.Fprintf(w, "\n\nCloud Storage Size for %v:\n", strings.Title(service))
 	fmt.Fprintln(w, "\n   Size\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "   -----\t------------\t-----\t")
 	for i, v := range volData {
@@ -214,4 +212,12 @@ func exportCSVFile(service string, volData []volumeData) error {
 		return err
 	}
 	return nil
+}
+
+func printDots(){
+	fmt.Printf("\nGetting Cloud Storage size")
+	for {
+		fmt.Print(".")
+		time.Sleep(time.Second * 1)
+	}
 }
