@@ -183,7 +183,7 @@ func formatOutput(service string, volData []volumeData) {
 	fmt.Fprintln(w, "\n\tSize\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "\t-----\t------------\t-----\t")
 	for i, v := range volData {
-		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t\n",i+1, v.Size, v.Name, v.UUID)
+		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t\n", i+1, v.Size, v.Name, v.UUID)
 	}
 	fmt.Fprintln(w)
 }
@@ -214,7 +214,7 @@ func exportCSVFile(service string, volData []volumeData) error {
 	return nil
 }
 
-func printDots(){
+func printDots() {
 	fmt.Printf("\nGetting Cloud Storage size")
 	for {
 		fmt.Print(".")
