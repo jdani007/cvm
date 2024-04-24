@@ -191,8 +191,6 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID, client *sto
 
 func getTieringSize(creds, cluster string, client *storage.Client) ([]volumeData, error) {
 
-	go printDots()
-
 	container, clusterName, osName, err := getTarget(creds, cluster)
 	if err != nil {
 		return nil, err

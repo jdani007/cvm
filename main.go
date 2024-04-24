@@ -45,29 +45,41 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := run(cluster, service, creds, export, client); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run(cluster, service, creds string, export bool, client *storage.Client) error {
+
+	if !export {
+		go printDots(service)
+	}
+
 	var volData []volumeData
+	var err error
 
 	switch service {
 	case "backup":
 		volData, err = getBackupSize(creds, cluster, client)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	case "tiering":
 		volData, err = getTieringSize(creds, cluster, client)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	if export {
 		if err := exportCSVFile(service, volData); err != nil {
-			log.Fatal(err)
+			return err
 		}
 	} else {
 		formatOutput(service, volData)
 	}
-
+	return nil
 }
 
 func getCredentials() (string, error) {
@@ -213,8 +225,8 @@ func exportCSVFile(service string, volData []volumeData) error {
 	return nil
 }
 
-func printDots() {
-	fmt.Printf("\nGetting Cloud Storage size")
+func printDots(service string) {
+	fmt.Printf("\nGetting Cloud Storage size for %v", strings.Title(service))
 	for {
 		fmt.Print(".")
 		time.Sleep(time.Second * 1)
