@@ -17,7 +17,7 @@ Set environment variables: **netapp_user** and **netapp_pass**
 
 ### Minimum permissions
 
-Netapp user:
+Netapp ONTAP user:
 
 &nbsp; Role: **READONLY**
 
