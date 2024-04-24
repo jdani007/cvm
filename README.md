@@ -29,7 +29,7 @@ Google Cloud Platorm:
 
 ## Console output:
 ```
-./mapstorage -cluster 192.168.0.1 -backup
+./mapstorage -cluster 192.168.0.1
 
 Volume Size for Backup:
 
