@@ -133,11 +133,10 @@ func getStorageSize(container, uuid string, client *storage.Client) (string, err
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return "", err
 		}
 		size += attrs.Size
 	}
-
 	return prettyByteSize(float64(size)), nil
 }
 
