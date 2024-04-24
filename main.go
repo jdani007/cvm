@@ -147,7 +147,7 @@ func prettyByteSize(bf float64) string {
 
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%.3g%sB", bf, unit)
+			return fmt.Sprintf("%3.2f%sB", bf, unit)
 		}
 		bf /= 1024.0
 	}
@@ -180,10 +180,10 @@ func formatOutput(service string, volData []volumeData) {
 	defer w.Flush()
 
 	fmt.Fprintf(w, "\n\nCloud Storage Size for %v:\n", strings.Title(service))
-	fmt.Fprintln(w, "\n   Size\tVolume Name\tUUID\t")
-	fmt.Fprintln(w, "   -----\t------------\t-----\t")
+	fmt.Fprintln(w, "\n\tSize\tVolume Name\tUUID\t")
+	fmt.Fprintln(w, "\t-----\t------------\t-----\t")
 	for i, v := range volData {
-		fmt.Fprintf(w, "%v  %v\t%v\t%v\t\n",i+1, v.Size, v.Name, v.UUID)
+		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t\n",i+1, v.Size, v.Name, v.UUID)
 	}
 	fmt.Fprintln(w)
 }
