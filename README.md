@@ -1,8 +1,8 @@
 # mapstorage
 
-Determine Google cloud storage per volume usage for Netapp Cloud Backup and Cloud Tiering.
+Determine Google Cloud Storage bucket size per volume usage for Netapp Cloud Backup and Cloud Tiering.
 
-Usage:
+## Usage:
 ```
 Usage of ./mapstorage:
   -cluster string
@@ -13,7 +13,15 @@ Usage of ./mapstorage:
         enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
 ```
 
-Console output:
+Set environment variables: **netapp_user** and **netapp_pass**
+
+Minimum permissions for Netapp user:
+
+&nbsp; Role: **READONLY**
+
+&nbsp; Mode: **HTTP**
+
+## Console output:
 ```
 ./mapstorage -cluster 192.168.0.1 -backup
 
