@@ -15,11 +15,17 @@ Usage of ./mapstorage:
 
 Set environment variables: **netapp_user** and **netapp_pass**
 
-Minimum permissions for Netapp user:
+### Minimum permissions
+
+Netapp user:
 
 &nbsp; Role: **READONLY**
 
 &nbsp; Mode: **HTTP**
+
+Google Cloud Platorm:
+
+&nbsp; Permissions: **storage.objects.list**
 
 ## Console output:
 ```
