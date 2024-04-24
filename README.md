@@ -34,7 +34,7 @@ Volume Size for Backup:
 3  1.71GB  temp_delete_me_as_well  bb1910c1-310c-41cb-8ce0-889cd108187a
 ```
 
-Creates a .csv file when using the -export flag.
+Runs silent and creates a .csv file when using the -export flag.
 
 ```
 ./mapstorage -cluster 192.168.0.1 -export
