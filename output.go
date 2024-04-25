@@ -34,15 +34,22 @@ func exportCSVFile(service string, volData []volumeData) error {
 	}
 	defer f.Close()
 
-	if _, err := f.WriteString("Server,Volume Name,Size,UUID\n"); err != nil {
+	_, err = f.WriteString("Server,Volume Name,Size,Location\n")
+	if err != nil {
 		return err
 	}
+
 	for _, v := range volData {
-		if _, err := f.WriteString(v.Server + "," + v.Name + "," + v.Size + "," + v.UUID + "\n"); err != nil {
+
+		location := `gs:\\` + v.Bucket + `\` + v.UUID
+		_, err := f.WriteString(v.Server + "," + v.Name + "," + v.Size + "," + location + "\n")
+		if err != nil {
 			return err
 		}
 	}
-	if _, err := f.WriteString("\nFile generated on " + timeStamp); err != nil {
+
+	_, err = f.WriteString("\nFile generated on " + timeStamp)
+	if err != nil {
 		return err
 	}
 	return nil

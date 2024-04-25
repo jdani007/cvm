@@ -18,6 +18,7 @@ type volumeData struct {
 	UUID   string
 	Size   string
 	Server string
+	Bucket string
 }
 
 func main() {

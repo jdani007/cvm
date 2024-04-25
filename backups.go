@@ -92,6 +92,7 @@ func mapVolToBackup(creds, container, url string, rel relationships, client *sto
 					UUID:   r.Destination.UUID,
 					Size:   size,
 					Server: source[0],
+					Bucket: container,
 				})
 			}
 		}

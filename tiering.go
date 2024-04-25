@@ -182,6 +182,7 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID, client *sto
 					UUID:   v2.BuftreeUUID,
 					Size:   size,
 					Server: v1.Server,
+					Bucket: container,
 				})
 			}
 		}
