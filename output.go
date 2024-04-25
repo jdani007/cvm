@@ -22,7 +22,7 @@ func formatOutput(service string, volData []volumeData) {
 	fmt.Fprintln(w)
 }
 
-func exportCSVFile(service string, volData []volumeData) error {
+func createCSV(service string, volData []volumeData) error {
 
 	timeStamp := time.Now().Format("01-02-2006-150405")
 

@@ -72,7 +72,7 @@ func run(cluster, service, creds, export string, client *storage.Client) error {
 
 	switch export {
 	case "local":
-		if err := exportCSVFile(service, volData); err != nil {
+		if err := createCSV(service, volData); err != nil {
 			return err
 		}
 	case "cloud":
