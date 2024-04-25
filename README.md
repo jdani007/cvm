@@ -6,11 +6,11 @@ Determine Google Cloud Storage bucket size per volume usage for Netapp Cloud Bac
 ```
 Usage of ./mapstorage:
   -cluster string
-        enter cluster hostname or ip
-  -export
-        export to csv file
+        Enter cluster hostname or ip
+  -export string
+        Export .csv file. Enter 'local' or 'cloud' (default "none")
   -service string
-        enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
+        Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
 ```
 
 Set environment variables: **netapp_user** and **netapp_pass**
@@ -26,6 +26,7 @@ Netapp ONTAP user:
 Google Cloud Platorm:
 
 &nbsp; Permissions: **storage.objects.list**
+&nbsp; Permissions: **storage.objects.create** for cloud upload
 
 ## Console output:
 ```

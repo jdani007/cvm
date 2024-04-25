@@ -190,27 +190,27 @@ func mapVolToTiering(container string, vols []volume, btus []btUUID, client *sto
 	return volData, nil
 }
 
-func getTieringSize(creds, cluster string, client *storage.Client) ([]volumeData, error) {
+func getTieringSize(creds, cluster string, client *storage.Client) (string, []volumeData, error) {
 
 	container, clusterName, osName, err := getTarget(creds, cluster)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	vols, err := getVolList(creds, cluster, clusterName)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	btus, err := getBtUUidList(creds, cluster, osName)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	v, err := mapVolToTiering(container, vols, btus, client)
+	volData, err := mapVolToTiering(container, vols, btus, client)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return v, nil
+	return container, volData, nil
 }

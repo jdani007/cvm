@@ -55,16 +55,17 @@ func run(cluster, service, creds, export string, client *storage.Client) error {
 	}
 
 	var volData []volumeData
+	var bucketName string
 	var err error
 
 	switch service {
 	case "backup":
-		volData, err = getBackupSize(creds, cluster, client)
+		bucketName, volData, err = getBackupSize(creds, cluster, client)
 		if err != nil {
 			return err
 		}
 	case "tiering":
-		volData, err = getTieringSize(creds, cluster, client)
+		bucketName, volData, err = getTieringSize(creds, cluster, client)
 		if err != nil {
 			return err
 		}
@@ -72,11 +73,13 @@ func run(cluster, service, creds, export string, client *storage.Client) error {
 
 	switch export {
 	case "local":
-		if err := createCSV(service, volData); err != nil {
+		if _, err := createCSV(service, volData); err != nil {
 			return err
 		}
 	case "cloud":
-
+		if err := uploadCSV(bucketName, service, volData, client); err != nil {
+			return err
+		}
 	default:
 		done <- true
 		formatOutput(service, volData)
@@ -127,22 +130,22 @@ func getHTTPClient(creds, url string) (*http.Response, error) {
 
 func getFlags() (string, string, string, error) {
 
-	cluster := flag.String("cluster", "", "Enter cluster hostname or ip")
-	service := flag.String("service", "backup", "Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
-	export := flag.String("export", "none", "Export .csv file. Enter 'local' or 'cloud', default 'none'")
+	cluster := flag.String("cluster", "", "Enter cluster hostname or ip.")
+	service := flag.String("service", "backup", "Enter 'backup' or 'tiering' to specify the service.")
+	export := flag.String("export", "none", "Export a .csv file. Enter 'local' or 'cloud'.")
 	flag.Parse()
 
 	if *cluster == "" {
 		return "", "", "", fmt.Errorf("enter cluster hostname or ip")
 	}
 	if *service == "" {
-		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
 	}
 	if *service != "backup" && *service != "tiering" {
-		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
+		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
 	}
 	if *export != "none" && *export != "local" && *export != "cloud" {
-		return "", "", "", fmt.Errorf("enter 'local' or 'cloud' to export .csv file")
+		return "", "", "", fmt.Errorf("enter 'local' or 'cloud' to export a .csv file")
 	}
 
 	return *cluster, *service, *export, nil

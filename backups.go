@@ -100,17 +100,17 @@ func mapVolToBackup(creds, container, url string, rel relationships, client *sto
 	return volData, nil
 }
 
-func getBackupSize(creds, cluster string, client *storage.Client) ([]volumeData, error) {
+func getBackupSize(creds, cluster string, client *storage.Client) (string, []volumeData, error) {
 
 	container, url, rel, err := getRelationships(creds, cluster)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	v, err := mapVolToBackup(creds, container, url, rel, client)
+	volData, err := mapVolToBackup(creds, container, url, rel, client)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return v, nil
+	return container, volData, nil
 }
