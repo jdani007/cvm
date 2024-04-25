@@ -46,7 +46,7 @@ Volume Size for Backup:
 ```
 <br>
 
-Runs silent and creates a .csv file filesystem when using the -export flag.
+Runs silent and creates a .csv file on the local filesystem.
 ```
 ./mapstorage -cluster 192.168.0.1 -export local
 ```
