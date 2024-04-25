@@ -69,13 +69,13 @@ func run(cluster, service, creds string, export bool, client *storage.Client) er
 		}
 	}
 
-	if export {
+	if !export {
+		done <- true
+		formatOutput(service, volData)
+	} else {
 		if err := exportCSVFile(service, volData); err != nil {
 			return err
 		}
-	} else {
-		done <- true
-		formatOutput(service, volData)
 	}
 	return nil
 }
