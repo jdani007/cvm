@@ -16,7 +16,7 @@ Usage of ./mapstorage:
 
 Set environment variables: **netapp_user** and **netapp_pass**
 
-### Minimum permissions
+## Minimum permissions
 
 Netapp ONTAP user:
 
