@@ -139,5 +139,3 @@ func getFlags() (string, string, bool, error) {
 
 	return *cluster, *service, *export, nil
 }
-
-
