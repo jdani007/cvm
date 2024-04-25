@@ -58,7 +58,7 @@ Runs silent and creates a .csv file on the local filesystem and uploads a copy t
 ```
 
 
-Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup|tiering).
+Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup | tiering).
 
 <br>
 
