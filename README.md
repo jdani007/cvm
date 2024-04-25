@@ -12,6 +12,7 @@ Usage of ./mapstorage:
   -service string
         Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
 ```
+<br>
 
 Set environment variables: **netapp_user** and **netapp_pass**
 
@@ -29,6 +30,8 @@ Google Cloud Platorm:
 
 &nbsp; Permissions: **storage.objects.create** for cloud upload
 
+<br>
+
 ## Console output:
 ```
 ./mapstorage -cluster 192.168.0.1
@@ -41,18 +44,23 @@ Volume Size for Backup:
 2  15.4GB  temp_delete_me          df4348fb-d8a9-4fc1-bf93-a8f8e66ef007  
 3  1.71GB  temp_delete_me_as_well  bb1910c1-310c-41cb-8ce0-889cd108187a
 ```
+<br>
 
+Runs silent and creates a .csv file filesystem when using the -export flag.
 ```
 ./mapstorage -cluster 192.168.0.1 -export local
 ```
-Runs silent and creates a .csv file filesystem when using the -export flag.
+<br>
 
+Runs silent and creates a .csv file on the local filesystem and uploads a copy to the cloud storage bucket.
 ```
 ./mapstorage -cluster 192.168.0.1 -export cloud
 ```
-Runs silent and creates a .csv file on the local filesystem and uploads a copy to the cloud storage bucket.
+
 
 Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup|tiering).
+
+<br>
 
 ### Typical buckets names:
 
