@@ -52,8 +52,10 @@ func main() {
 
 func run(cluster, service, creds string, export bool, client *storage.Client) error {
 
+	done := make(chan bool)
+
 	if !export {
-		go printDots(service)
+		go printDots(service, done)
 	}
 
 	var volData []volumeData
@@ -77,6 +79,7 @@ func run(cluster, service, creds string, export bool, client *storage.Client) er
 			return err
 		}
 	} else {
+		done <- true
 		formatOutput(service, volData)
 	}
 	return nil
@@ -132,7 +135,7 @@ func getStorageClient() (*storage.Client, error) {
 
 func getStorageSize(container, uuid string, client *storage.Client) (string, error) {
 
-	bucket := client.Bucket(container)
+	bucket := client.Bucket("test-"+container)
 
 	it := bucket.Objects(context.Background(), &storage.Query{
 		Prefix: uuid + "/",
@@ -225,10 +228,16 @@ func exportCSVFile(service string, volData []volumeData) error {
 	return nil
 }
 
-func printDots(service string) {
+func printDots(service string, done chan bool) {
 	fmt.Printf("\nGetting Cloud Storage size for %v", strings.Title(service))
 	for {
-		fmt.Print(".")
-		time.Sleep(time.Second * 1)
+		select {
+		case <-done:
+			fmt.Println("done")
+			return
+		default:
+			fmt.Print(".")
+			time.Sleep(time.Second * 1)
+		}
 	}
 }
