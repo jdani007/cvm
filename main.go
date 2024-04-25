@@ -129,7 +129,7 @@ func getFlags() (string, string, string, error) {
 
 	cluster := flag.String("cluster", "", "Enter cluster hostname or ip")
 	service := flag.String("service", "backup", "Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
-	export := flag.String("export", "none", "Export .csv file. Enter 'local' or 'cloud'. default 'none'")
+	export := flag.String("export", "none", "Export .csv file. Enter 'local' or 'cloud', default 'none'")
 	flag.Parse()
 
 	if *cluster == "" {
@@ -141,10 +141,9 @@ func getFlags() (string, string, string, error) {
 	if *service != "backup" && *service != "tiering" {
 		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service")
 	}
-	if *export != "none" && *export != "local" && *export != "cloud"{
+	if *export != "none" && *export != "local" && *export != "cloud" {
 		return "", "", "", fmt.Errorf("enter 'local' or 'cloud' to export .csv file")
 	}
-
 
 	return *cluster, *service, *export, nil
 }

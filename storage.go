@@ -45,9 +45,9 @@ func prettyByteSize(bf float64) string {
 
 	for _, unit := range []string{"", "K", "M", "G", "T", "P", "E", "Z"} {
 		if math.Abs(bf) < 1024.0 {
-			return fmt.Sprintf("%3.2f%sB", bf, unit)
+			return fmt.Sprintf("%3.2f %sB", bf, unit)
 		}
 		bf /= 1024.0
 	}
-	return fmt.Sprintf("%.1fYiB", bf)
+	return fmt.Sprintf("%.1f YiB", bf)
 }
