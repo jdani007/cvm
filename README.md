@@ -26,6 +26,7 @@ Netapp ONTAP user:
 Google Cloud Platorm:
 
 &nbsp; Permissions: **storage.objects.list**
+
 &nbsp; Permissions: **storage.objects.create** for cloud upload
 
 ## Console output:
@@ -41,8 +42,20 @@ Volume Size for Backup:
 3  1.71GB  temp_delete_me_as_well  bb1910c1-310c-41cb-8ce0-889cd108187a
 ```
 
-Runs silent and creates a .csv file when using the -export flag.
+```
+./mapstorage -cluster 192.168.0.1 -export local
+```
+Runs silent and creates a .csv file filesystem when using the -export flag.
 
 ```
-./mapstorage -cluster 192.168.0.1 -export
+./mapstorage -cluster 192.168.0.1 -export cloud
 ```
+Runs silent and creates a .csv file on the local filesystem and uploads a copy to the cloud storage bucket.
+
+Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup|tiering).
+
+### Typical buckets names:
+
+Netapp Cloud Backup: **netapp-backup-\<random string>**
+
+Netapp Cloud Tiering: **fabric-pool-\<random uuid>**
