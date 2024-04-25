@@ -135,7 +135,7 @@ func getStorageClient() (*storage.Client, error) {
 
 func getStorageSize(container, uuid string, client *storage.Client) (string, error) {
 
-	bucket := client.Bucket("test-"+container)
+	bucket := client.Bucket(container)
 
 	it := bucket.Objects(context.Background(), &storage.Query{
 		Prefix: uuid + "/",
@@ -233,7 +233,6 @@ func printDots(service string, done chan bool) {
 	for {
 		select {
 		case <-done:
-			fmt.Println("done")
 			return
 		default:
 			fmt.Print(".")
