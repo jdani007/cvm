@@ -90,7 +90,7 @@ func createCSV(service string, volData []volumeData) (string, error) {
 }
 
 func printDots(service string, done chan bool) {
-	fmt.Printf("\nGetting Cloud Storage size for %v", strings.Title(service))
+	fmt.Printf("\nGetting Cloud Storage size for Cloud %v", strings.Title(service))
 	for {
 		select {
 		case <-done:
