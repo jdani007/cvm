@@ -1,10 +1,10 @@
-# mapstorage
+# CVM (Cloud Volume Mapper)
 
 Determine Google Cloud Storage bucket size per volume usage for Netapp Cloud Backup and Cloud Tiering.
 
 ## Usage:
 ```
-Usage of ./mapstorage:
+Usage of ./cvm:
   -cluster string
         Enter cluster hostname or ip
   -export string
@@ -34,7 +34,7 @@ Google Cloud Platorm:
 
 ## Console output:
 ```
-./mapstorage -cluster 192.168.0.1
+./cvm -cluster 192.168.0.1
 
 Volume Size for Backup:
 
@@ -48,13 +48,13 @@ Volume Size for Backup:
 
 Runs silent and creates a .csv file on the local filesystem.
 ```
-./mapstorage -cluster 192.168.0.1 -export local
+./cvm -cluster 192.168.0.1 -export local
 ```
 <br>
 
 Runs silent and creates a .csv file on the local filesystem and uploads a copy to the cloud storage bucket.
 ```
-./mapstorage -cluster 192.168.0.1 -export cloud
+./cvm -cluster 192.168.0.1 -export cloud
 ```
 
 
