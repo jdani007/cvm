@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -45,7 +46,7 @@ type btUUID struct {
 
 func getTargets(creds, cluster string) (string, targets, error) {
 
-	url := "https://" + cluster + "/api/cloud/targets/"
+	url := fmt.Sprintf("https://%v/api/cloud/targets/", cluster)
 
 	var t targets
 
@@ -91,7 +92,8 @@ func getTarget(creds, cluster string) (string, string, string, error) {
 }
 
 func getVolumes(creds, cluster string) (volumes, error) {
-	url := "https://" + cluster + "/api/private/cli/volume/?fields=uuid,volume"
+
+	url := fmt.Sprintf("https://%v/api/private/cli/volume/?fields=uuid,volume", cluster)
 
 	var v volumes
 
@@ -131,7 +133,8 @@ func getVolList(creds, cluster, clusterName string) ([]volume, error) {
 }
 
 func getObjectStore(creds, cluster string) (objectStore, error) {
-	url := "https://" + cluster + "/api/private/cli/storage/aggregate/object-store/vol-btuuids?fields=buftree_uuid,vol_uuid"
+
+	url := fmt.Sprintf("https://%v/api/private/cli/storage/aggregate/object-store/vol-btuuids?fields=buftree_uuid,vol_uuid", cluster)
 
 	var o objectStore
 	resp, err := getHTTPClient(creds, url)

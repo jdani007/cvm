@@ -43,7 +43,7 @@ func uploadCSV(bucketName, service string, volData []volumeData, client *storage
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*50)
 	defer cancel()
 
-	object := bucket.Object("report/" + fileName)
+	object := bucket.Object("reports/" + fileName)
 	object = object.If(storage.Conditions{DoesNotExist: true})
 
 	wo := object.NewWriter(ctx)
@@ -61,7 +61,7 @@ func createCSV(service string, volData []volumeData) (string, error) {
 
 	timeStamp := time.Now().Format("01-02-2006-150405")
 
-	fileName := service + "-" + timeStamp + ".csv"
+	fileName := fmt.Sprintf("%v-%v.csv", service, timeStamp)
 
 	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -75,8 +75,7 @@ func createCSV(service string, volData []volumeData) (string, error) {
 	}
 
 	for _, v := range volData {
-
-		location := `gs:\\` + v.Bucket + `\` + v.UUID
+		location := fmt.Sprintf("gs://%v/%v", v.Bucket, v.UUID)
 		_, err := f.WriteString(v.Server + "," + v.Name + "," + v.Size + "," + location + "\n")
 		if err != nil {
 			return "", err

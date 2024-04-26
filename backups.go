@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -29,7 +30,7 @@ type destination struct {
 
 func getRelationships(creds, cluster string) (string, string, relationships, error) {
 
-	url := "https://" + cluster + "/api/snapmirror/relationships/"
+	url := fmt.Sprintf("https://%v/api/snapmirror/relationships/", cluster)
 
 	var rel relationships
 
