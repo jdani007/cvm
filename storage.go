@@ -21,13 +21,13 @@ func getStorageSize(container, uuid string, client *storage.Client) (string, err
 
 	bucket := client.Bucket(container)
 
-	it := bucket.Objects(context.Background(), &storage.Query{
+	objects := bucket.Objects(context.Background(), &storage.Query{
 		Prefix: uuid + "/",
 	})
 
 	var size int64
 	for {
-		attrs, err := it.Next()
+		attrs, err := objects.Next()
 		if err == iterator.Done {
 			break
 		}
