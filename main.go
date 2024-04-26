@@ -138,9 +138,6 @@ func getFlags() (string, string, string, error) {
 	if *cluster == "" {
 		return "", "", "", fmt.Errorf("enter cluster hostname or ip")
 	}
-	if *service == "" {
-		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
-	}
 	if *service != "backup" && *service != "tiering" {
 		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
 	}
