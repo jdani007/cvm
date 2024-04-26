@@ -1,4 +1,4 @@
-# CVM (Cloud Volume Mapper)
+# Cloud Volume Mapper (CVM)
 
 Determine Google Cloud Storage bucket size per volume usage for Netapp Cloud Backup and Cloud Tiering.
 
