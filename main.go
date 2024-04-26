@@ -47,6 +47,7 @@ func main() {
 }
 
 func run(cluster, service, creds, export string, client *storage.Client) error {
+	defer client.Close()
 
 	done := make(chan bool)
 
