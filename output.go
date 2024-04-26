@@ -46,11 +46,11 @@ func uploadCSV(bucketName, service string, volData []volumeData, client *storage
 	object := bucket.Object("reports/" + fileName)
 	object = object.If(storage.Conditions{DoesNotExist: true})
 
-	wo := object.NewWriter(ctx)
-	if _, err := io.Copy(wo, fileData); err != nil {
+	writer := object.NewWriter(ctx)
+	if _, err := io.Copy(writer, fileData); err != nil {
 		return err
 	}
-	if err := wo.Close(); err != nil {
+	if err := writer.Close(); err != nil {
 		return err
 	}
 
