@@ -1,4 +1,4 @@
-module mapstorage
+module cvm
 
 go 1.22.1
 
