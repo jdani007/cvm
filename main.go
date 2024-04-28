@@ -163,12 +163,22 @@ func loadEnv() error {
 	}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		s := strings.Split(scanner.Text(), "=")
-		k := strings.Trim(s[0], "\"")
-		v := strings.Trim(s[1], "\"")
+		s := strings.TrimSpace(scanner.Text())
+		ss := strings.SplitN(s, "=", 2)
+		if len(ss) != 2 {
+			continue
+		}
+		k := cleanSlice(ss[0])
+		v := cleanSlice(ss[1])
 		if err := os.Setenv(k, v); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func cleanSlice(s string) string {
+	s = strings.Trim(s, "\"")
+	s = strings.Trim(s, "'")
+	return s
 }
