@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/tls"
 	"encoding/base64"
 	"flag"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -19,6 +21,13 @@ type volumeData struct {
 	Size   string
 	Server string
 	Bucket string
+}
+
+func init() {
+	if err := loadEnv(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func main() {
@@ -97,11 +106,11 @@ func getCredentials() (string, error) {
 
 	user, ok := os.LookupEnv("netapp_user")
 	if !ok {
-		return "", fmt.Errorf("missing environment variable for 'netapp_user'")
+		return "", fmt.Errorf("missing environment variable 'netapp_user'")
 	}
 	pass, ok := os.LookupEnv("netapp_pass")
 	if !ok {
-		return "", fmt.Errorf("missing environment variable for 'netapp_pass'")
+		return "", fmt.Errorf("missing environment variable 'netapp_pass'")
 	}
 
 	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass)), nil
@@ -151,4 +160,21 @@ func getFlags() (string, string, string, error) {
 	}
 
 	return *cluster, *service, *export, nil
+}
+
+func loadEnv() error {
+	file, err := os.Open(".env")
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		s := strings.Split(scanner.Text(), "=")
+		k := strings.Trim(s[0], "\"")
+		v := strings.Trim(s[1], "\"")
+		if err := os.Setenv(k, v); err != nil {
+			return err
+		}
+	}
+	return nil
 }
