@@ -75,8 +75,8 @@ func createCSV(service string, volData []volumeData) (string, error) {
 	}
 
 	for _, v := range volData {
-		heading := fmt.Sprintf("%v,%v,%v,%v,%v\n", v.Server, v.Name, v.Size, v.Bucket, v.UUID)
-		_, err := f.WriteString(heading)
+		data := fmt.Sprintf("%v,%v,%v,%v,%v\n", v.Server, v.Name, v.Size, v.Bucket, v.UUID)
+		_, err := f.WriteString(data)
 		if err != nil {
 			return "", err
 		}
