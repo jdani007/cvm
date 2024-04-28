@@ -33,7 +33,7 @@ Google Cloud Platorm:
 
 ## Environment Configuration
 
-Environment variable is set via a file named ".env" in current folder.
+Environment variable is set via a file named ".env" in the current folder.
 
 ```
 netapp_auth="dXNlcm5hbWU6cGFzc3dvcmQ="
@@ -62,13 +62,13 @@ Volume Size for Backup:
 ```
 <br>
 
-Runs silent and creates a .csv file on the local filesystem.
+Runs silent and creates a CSV file on the local filesystem.
 ```
 ./cvm -cluster 192.168.0.1 -export local
 ```
 <br>
 
-Runs silent and creates a .csv file on the local filesystem and uploads a copy to the cloud storage bucket.
+Runs silent and creates a CSV file on the local filesystem and uploads a copy to the cloud storage bucket.
 ```
 ./cvm -cluster 192.168.0.1 -export cloud
 ```
