@@ -17,9 +17,9 @@ func getStorageClient() (*storage.Client, error) {
 	return c, nil
 }
 
-func getStorageSize(container, uuid string, client *storage.Client) (string, error) {
+func getStorageSize(bucketName, uuid string, client *storage.Client) (string, error) {
 
-	bucket := client.Bucket(container)
+	bucket := client.Bucket(bucketName)
 
 	objects := bucket.Objects(context.Background(), &storage.Query{
 		Prefix: uuid + "/",
