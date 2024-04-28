@@ -26,12 +26,7 @@ func formatOutput(service string, volData []volumeData) {
 	fmt.Fprintln(w)
 }
 
-func uploadCSV(bucketName, service string, volData []volumeData, client *storage.Client) error {
-
-	fileName, err := createCSV(service, volData)
-	if err != nil {
-		return err
-	}
+func uploadCSV(fileName, bucketName string, client *storage.Client) error {
 
 	bucket := client.Bucket(bucketName)
 	fileData, err := os.Open(fileName)
@@ -57,11 +52,11 @@ func uploadCSV(bucketName, service string, volData []volumeData, client *storage
 	return nil
 }
 
-func createCSV(service string, volData []volumeData) (string, error) {
+func createCSV(cluster, service string, volData []volumeData) (string, error) {
 
 	timeStamp := time.Now().Format("01-02-2006-150405")
 
-	fileName := fmt.Sprintf("%v-%v.csv", service, timeStamp)
+	fileName := fmt.Sprintf("%v-%v-%v.csv", cluster, service, timeStamp)
 
 	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -82,10 +77,6 @@ func createCSV(service string, volData []volumeData) (string, error) {
 		}
 	}
 
-	_, err = f.WriteString("\nFile generated on " + timeStamp)
-	if err != nil {
-		return "", err
-	}
 	return fileName, nil
 }
 
