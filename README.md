@@ -8,7 +8,7 @@ Usage of ./cvm:
   -cluster string
         Enter cluster hostname or ip
   -export string
-        Export CSV file. Enter 'local' or 'cloud' (default "none")
+        Export CSV a file. Enter 'local' or 'cloud' (default "none")
   -service string
         Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
 ```
