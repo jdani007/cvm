@@ -14,7 +14,6 @@ Usage of ./cvm:
 ```
 <br>
 
-Set environment variables: **netapp_user** and **netapp_pass**
 
 ## Minimum permissions
 
@@ -29,6 +28,23 @@ Google Cloud Platorm:
 &nbsp; Permissions: **storage.objects.list**
 
 &nbsp; Permissions: **storage.objects.create** for cloud upload
+
+<br>
+
+## Environment Configuration
+
+Environment variable is set via a file named ".env" in current folder.
+
+```
+netapp_auth="dXNlcm5hbWU6cGFzc3dvcmQ="
+```
+
+Authentication must be set with the user name and password encoded as a base64 string. For example:
+
+```
+$ echo -n "username:password" | base64
+dXNlcm5hbWU6cGFzc3dvcmQ=
+```
 
 <br>
 
