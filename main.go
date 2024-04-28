@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -38,7 +37,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	creds, err := getCredentials()
+	auth, err := getAuth()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -50,12 +49,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := run(cluster, service, creds, export, client); err != nil {
+	if err := run(cluster, service, auth, export, client); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(cluster, service, creds, export string, client *storage.Client) error {
+func run(cluster, service, auth, export string, client *storage.Client) error {
 	defer client.Close()
 
 	done := make(chan bool)
@@ -70,12 +69,12 @@ func run(cluster, service, creds, export string, client *storage.Client) error {
 
 	switch service {
 	case "backup":
-		bucketName, volData, err = getBackupSize(creds, cluster, client)
+		bucketName, volData, err = getBackupSize(auth, cluster, client)
 		if err != nil {
 			return err
 		}
 	case "tiering":
-		bucketName, volData, err = getTieringSize(creds, cluster, client)
+		bucketName, volData, err = getTieringSize(auth, cluster, client)
 		if err != nil {
 			return err
 		}
@@ -102,21 +101,16 @@ func run(cluster, service, creds, export string, client *storage.Client) error {
 	return nil
 }
 
-func getCredentials() (string, error) {
+func getAuth() (string, error) {
 
-	user, ok := os.LookupEnv("netapp_user")
+	auth, ok := os.LookupEnv("netapp_auth")
 	if !ok {
-		return "", fmt.Errorf("missing environment variable 'netapp_user'")
+		return "", fmt.Errorf("missing environment variable 'netapp_auth'")
 	}
-	pass, ok := os.LookupEnv("netapp_pass")
-	if !ok {
-		return "", fmt.Errorf("missing environment variable 'netapp_pass'")
-	}
-
-	return base64.StdEncoding.EncodeToString([]byte(user + ":" + pass)), nil
+	return auth, nil
 }
 
-func getHTTPClient(creds, url string) (*http.Response, error) {
+func getHTTPClient(auth, url string) (*http.Response, error) {
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
@@ -130,7 +124,7 @@ func getHTTPClient(creds, url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Authorization", "Basic "+creds)
+	request.Header.Set("Authorization", "Basic "+auth)
 	resp, err := client.Do(request)
 	if err == nil {
 		if resp.StatusCode == http.StatusOK {
