@@ -27,9 +27,9 @@ Netapp ONTAP user:
 
 Google Cloud Platorm:
 
-&nbsp; Permissions: **storage.objects.list**
+&nbsp; **storage.objects.list**
 
-&nbsp; Permissions: **storage.objects.create** for cloud upload
+&nbsp; **storage.objects.create** for cloud upload
 
 <br>
 
