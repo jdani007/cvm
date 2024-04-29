@@ -12,6 +12,14 @@ import (
 	"cloud.google.com/go/storage"
 )
 
+type volumeData struct {
+	Name   string
+	UUID   string
+	Size   string
+	Server string
+	Bucket string
+}
+
 func formatOutput(service string, volData []volumeData) {
 
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)

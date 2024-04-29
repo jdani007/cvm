@@ -13,14 +13,6 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-type volumeData struct {
-	Name   string
-	UUID   string
-	Size   string
-	Server string
-	Bucket string
-}
-
 func main() {
 
 	env, cluster, service, export, err := getFlags()
