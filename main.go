@@ -1,14 +1,11 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -91,32 +88,6 @@ func run(cluster, service, auth, export string, client *storage.Client) error {
 	}
 
 	return nil
-}
-
-func getHTTPClient(auth, url string) (*http.Response, error) {
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	client := &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: transport,
-	}
-
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Set("Authorization", "Basic "+auth)
-	resp, err := client.Do(request)
-	if err == nil {
-		if resp.StatusCode == http.StatusOK {
-			return resp, nil
-		} else {
-			return nil, fmt.Errorf(resp.Status)
-		}
-	}
-	return nil, err
 }
 
 func getFlags() (string, string, string, string, error) {

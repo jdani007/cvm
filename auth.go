@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"hash/crc32"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
@@ -85,4 +88,30 @@ func cleanString(s string) string {
 	s = strings.Trim(s, "\"")
 	s = strings.Trim(s, "'")
 	return s
+}
+
+func getHTTPClient(auth, url string) (*http.Response, error) {
+
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	client := &http.Client{
+		Timeout:   time.Second * 10,
+		Transport: transport,
+	}
+
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Authorization", "Basic "+auth)
+	resp, err := client.Do(request)
+	if err == nil {
+		if resp.StatusCode == http.StatusOK {
+			return resp, nil
+		} else {
+			return nil, fmt.Errorf(resp.Status)
+		}
+	}
+	return nil, err
 }
