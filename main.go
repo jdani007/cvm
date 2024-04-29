@@ -166,8 +166,8 @@ func loadEnv() error {
 		s := strings.TrimSpace(scanner.Text())
 		ss := strings.SplitN(s, "=", 2)
 		if len(ss) == 2 {
-			k := cleanSlice(ss[0])
-			v := cleanSlice(ss[1])
+			k := cleanString(ss[0])
+			v := cleanString(ss[1])
 			if err := os.Setenv(k, v); err != nil {
 				return err
 			}
@@ -178,7 +178,7 @@ func loadEnv() error {
 	return nil
 }
 
-func cleanSlice(s string) string {
+func cleanString(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.Trim(s, "\"")
 	s = strings.Trim(s, "'")
