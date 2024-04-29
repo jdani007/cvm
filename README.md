@@ -6,11 +6,13 @@ Determine Google Cloud Storage bucket size per volume usage for Netapp Cloud Bac
 ```
 Usage of ./cvm:
   -cluster string
-        Enter cluster hostname or ip
+    	Enter cluster hostname or ip.
+  -env string
+    	Location of .env file (default ".env")
   -export string
-        Export CSV a file. Enter 'local' or 'cloud' (default "none")
+    	Export a CSV file. Enter 'local' or 'cloud'. (default "none")
   -service string
-        Enter 'backup' or 'tiering' to retrieve cloud storage utilization for the service (default "backup")
+    	Enter 'backup' or 'tiering' to specify the service. (default "backup")
 ```
 <br>
 
