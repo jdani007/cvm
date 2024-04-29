@@ -71,9 +71,11 @@ func run(cluster, service, auth, export string, client *storage.Client) error {
 
 	switch export {
 	case "local":
-		if _, err := createCSV(cluster, service, volData); err != nil {
+		fileName, err := createCSV(cluster, service, volData)
+		if err != nil {
 			return err
 		}
+		fmt.Print(fileName)
 	case "cloud":
 		fileName, err := createCSV(cluster, service, volData)
 		if err != nil {
@@ -82,6 +84,7 @@ func run(cluster, service, auth, export string, client *storage.Client) error {
 		if err := uploadCSV(fileName, bucketName, client); err != nil {
 			return err
 		}
+		fmt.Print(fileName)
 	default:
 		done <- true
 		formatOutput(service, volData)
