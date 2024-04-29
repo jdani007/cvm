@@ -84,7 +84,7 @@ Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the cor
 
 <br>
 
-### Typical buckets names:
+### Typical GCP buckets names create by the Netapp services:
 
 Netapp Cloud Backup: **netapp-backup-\<random string>**
 
