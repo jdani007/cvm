@@ -25,7 +25,7 @@ func formatOutput(service string, volData []volumeData) {
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 	defer w.Flush()
 
-	fmt.Fprintf(w, "\n\nCloud Storage Size for %v:\n", strings.Title(service))
+	fmt.Fprintf(w, "\n\nCloud Storage Size for Netapp Cloud %v:\n", strings.Title(service))
 	fmt.Fprintln(w, "\n\tSize\tVolume Name\tUUID\t")
 	fmt.Fprintln(w, "\t-----\t------------\t-----\t")
 	for i, v := range volData {
@@ -89,7 +89,7 @@ func createCSV(cluster, service string, volData []volumeData) (string, error) {
 }
 
 func printDots(service string, done chan bool) {
-	fmt.Printf("\nGetting Cloud Storage size for Cloud %v", strings.Title(service))
+	fmt.Printf("\nGetting Cloud Storage size for Netapp Cloud %v", strings.Title(service))
 	for {
 		select {
 		case <-done:
