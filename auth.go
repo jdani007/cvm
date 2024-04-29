@@ -1,0 +1,88 @@
+package main
+
+import (
+	"bufio"
+	"context"
+	"fmt"
+	"hash/crc32"
+	"os"
+	"strings"
+
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+)
+
+func getAuth() (string, error) {
+
+	secret, ok := os.LookupEnv("netapp_auth")
+	if !ok {
+		return "", fmt.Errorf("missing environment variable 'netapp_auth'")
+	}
+	payload, err := accessSecretVersion(secret)
+	if err != nil {
+		return "", err
+	}
+
+	return payload, nil
+}
+
+// https://cloud.google.com/secret-manager/docs/access-secret-version#secretmanager-access-secret-version-go
+func accessSecretVersion(name string) (string, error) {
+
+	// Create the client.
+	ctx := context.Background()
+	client, err := secretmanager.NewClient(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to create secretmanager client: %w", err)
+	}
+	defer client.Close()
+
+	// Build the request.
+	req := &secretmanagerpb.AccessSecretVersionRequest{
+		Name: name,
+	}
+
+	// Call the API.
+	result, err := client.AccessSecretVersion(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("failed to access secret version: %w", err)
+	}
+
+	// Verify the data checksum.
+	crc32c := crc32.MakeTable(crc32.Castagnoli)
+	checksum := int64(crc32.Checksum(result.Payload.Data, crc32c))
+	if checksum != *result.Payload.DataCrc32C {
+		return "", fmt.Errorf("data corruption detected")
+	}
+
+	return string(result.Payload.Data), nil
+}
+
+func loadEnv() error {
+	file, err := os.Open(".env")
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		s := strings.TrimSpace(scanner.Text())
+		ss := strings.SplitN(s, "=", 2)
+		if len(ss) == 2 {
+			k := cleanString(ss[0])
+			v := cleanString(ss[1])
+			if err := os.Setenv(k, v); err != nil {
+				return err
+			}
+		} else {
+			continue
+		}
+	}
+	return nil
+}
+
+func cleanString(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.Trim(s, "\"")
+	s = strings.Trim(s, "'")
+	return s
+}

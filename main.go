@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -101,15 +99,6 @@ func run(cluster, service, auth, export string, client *storage.Client) error {
 	return nil
 }
 
-func getAuth() (string, error) {
-
-	auth, ok := os.LookupEnv("netapp_auth")
-	if !ok {
-		return "", fmt.Errorf("missing environment variable 'netapp_auth'")
-	}
-	return auth, nil
-}
-
 func getHTTPClient(auth, url string) (*http.Response, error) {
 
 	transport := http.DefaultTransport.(*http.Transport).Clone()
@@ -154,33 +143,4 @@ func getFlags() (string, string, string, error) {
 	}
 
 	return *cluster, *service, *export, nil
-}
-
-func loadEnv() error {
-	file, err := os.Open(".env")
-	if err != nil {
-		return err
-	}
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		s := strings.TrimSpace(scanner.Text())
-		ss := strings.SplitN(s, "=", 2)
-		if len(ss) == 2 {
-			k := cleanString(ss[0])
-			v := cleanString(ss[1])
-			if err := os.Setenv(k, v); err != nil {
-				return err
-			}
-		} else {
-			continue
-		}
-	}
-	return nil
-}
-
-func cleanString(s string) string {
-	s = strings.TrimSpace(s)
-	s = strings.Trim(s, "\"")
-	s = strings.Trim(s, "'")
-	return s
 }

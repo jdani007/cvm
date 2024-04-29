@@ -33,17 +33,23 @@ Google Cloud Platorm:
 
 ## Environment Configuration
 
-Environment variable is set via a file named ".env" in the current folder.
-
-```
-netapp_auth="dXNlcm5hbWU6cGFzc3dvcmQ="
-```
-
-Authentication must be set with the user name and password encoded as a base64 string. For example:
-
+Authentication must be set with the Netapp username and password encoded as a Base64 string. For example:
 ```
 $ echo -n 'username:password' | base64
 dXNlcm5hbWU6cGFzc3dvcmQ=
+```
+Create a GCP secret with the Base64 string as the secret value. [Create a secret](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets#secretmanager-create-secret-console)
+
+<br>
+
+Environment variable is a GCP secret which is set via a file named ".env" in the current folder.
+
+The secret version can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+
+```
+netapp_auth="projects/my-project/secrets/my-secret/versions/5"
+or
+netapp_auth="projects/my-project/secrets/my-secret/versions/latest"
 ```
 
 <br>
