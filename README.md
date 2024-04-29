@@ -60,7 +60,7 @@ netapp_auth="projects/my-project/secrets/my-secret/versions/latest"
 ```
 ./cvm -cluster 192.168.0.1
 
-Volume Size for Backup:
+Volume Size for Netapp Cloud Backup:
 
    Size     Volume Name             UUID                                  
    -----    ------------            -----                                 
@@ -76,13 +76,13 @@ Runs silent and creates a CSV file on the local filesystem.
 ```
 <br>
 
-Runs silent and creates a CSV file on the local filesystem and uploads a copy to the cloud storage bucket.
+Runs silent and creates a CSV file on the local filesystem and uploads a copy to the cloud storage bucket. Outputs file name. 
 ```
 ./cvm -cluster 192.168.0.1 -export cloud
 ```
 
 
-Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup | tiering).
+Cloud upload creates a 'report' subfolder in the Cloud Storage bucket of the corresponding service (backup | tiering).  Outputs file name.
 
 <br>
 
