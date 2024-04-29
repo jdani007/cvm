@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -20,17 +21,15 @@ type volumeData struct {
 	Bucket string
 }
 
-func init() {
-	if err := loadEnv(); err != nil {
+func main() {
+
+	env, cluster, service, export, err := getFlags()
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
 
-func main() {
-
-	cluster, service, export, err := getFlags()
-	if err != nil {
+	if err := loadEnv(env); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -125,22 +124,26 @@ func getHTTPClient(auth, url string) (*http.Response, error) {
 	return nil, err
 }
 
-func getFlags() (string, string, string, error) {
+func getFlags() (string, string, string, string, error) {
 
 	cluster := flag.String("cluster", "", "Enter cluster hostname or ip.")
 	service := flag.String("service", "backup", "Enter 'backup' or 'tiering' to specify the service.")
 	export := flag.String("export", "none", "Export a CSV file. Enter 'local' or 'cloud'.")
+	env := flag.String("env", ".env", "Location of .env file")
 	flag.Parse()
 
 	if *cluster == "" {
-		return "", "", "", fmt.Errorf("enter cluster hostname or ip")
+		return "", "", "", "", fmt.Errorf("enter cluster hostname or ip")
 	}
+	*service = strings.ToLower(*service)
 	if *service != "backup" && *service != "tiering" {
-		return "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
+		return "", "", "", "", fmt.Errorf("enter 'backup' or 'tiering' to specify the service")
 	}
+	*export = strings.ToLower(*export)
 	if *export != "none" && *export != "local" && *export != "cloud" {
-		return "", "", "", fmt.Errorf("enter 'local' or 'cloud' to export a CSV file")
+		return "", "", "", "", fmt.Errorf("enter 'local' or 'cloud' to export a CSV file")
 	}
+	*env = strings.ToLower(*env)
 
-	return *cluster, *service, *export, nil
+	return *env, *cluster, *service, *export, nil
 }

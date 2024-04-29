@@ -58,8 +58,8 @@ func accessSecretVersion(name string) (string, error) {
 	return string(result.Payload.Data), nil
 }
 
-func loadEnv() error {
-	file, err := os.Open(".env")
+func loadEnv(envFile string) error {
+	file, err := os.Open(envFile)
 	if err != nil {
 		return err
 	}
